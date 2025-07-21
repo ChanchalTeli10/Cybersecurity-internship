@@ -1,0 +1,6 @@
+From the lecture, I understood that malware analysis is the process of studying harmful software to know how it works,
+where it comes from, and how it affects systems. We learned about different types of analysis—like static, dynamic, memory,
+and behavioral—and how each helps in detecting and understanding malware. The lecture also explained the tools used,
+such as IDA Pro, Wireshark, and Volatility, and common signs of malware activity like suspicious files, registry changes,
+and unusual memory usage. A real example of ransomware was also discussed, which helped me understand how serious and 
+dangerous malware can be.

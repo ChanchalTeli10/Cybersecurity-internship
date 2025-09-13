@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictionary Attack Simulator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body {
+    font-family: 'Arial', sans-serif;
+    background: #1f2937; /* Dark professional background */
+    color: #e5e7eb;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.tab-nav {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.tab-link {
+    background: #374151;
+    color: #d1d5db;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.tab-link.active {
+    background: #f9fafb;
+    color: #1f2937;
+    font-weight: bold;
+}
+.section {
+    display: none;
+    background: #111827;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
+    color: #e5e7eb;
+}
+.section.active {
+    display: block;
+}
+.password-input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #374151;
+    background: #1f2937;
+    color: #f9fafb;
+}
+.strength-bar {
+    height: 6px;
+    background: #374151;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+.strength-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s;
+}
+.weak { background: #ef4444; } /* red */
+.fair { background: #f59e0b; } /* orange */
+.good { background: #10b981; } /* green */
+.strong { background: #3b82f6; } /* blue */
+.demo-modal {
+    display: none;
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(31,41,55,0.8);
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+}
+.demo-content {
+    background: #1f2937;
+    padding:20px;
+    border-radius:10px;
+    max-width:400px;
+    width:100%;
+    margin:20px;
+    box-shadow:0 8px 15px rgba(0,0,0,0.3);
+    color: #f9fafb;
+}
+.fake-login {
+    border: 1px solid #374151;
+    padding:20px;
+    background:#1f2937;
+    border-radius:5px;
+}
+button {
+    transition: all 0.3s;
+}
+button:hover { opacity: 0.9; }
+.animate-bounce { animation: bounce 2s infinite; }
+@keyframes bounce {0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1 class="text-3xl font-bold text-center mb-10 text-white">Dictionary Attack Simulator</h1>
+
+<div class="tab-nav">
+    <div class="tab-link active" onclick="showSection(1)">Introduction</div>
+    <div class="tab-link" onclick="showSection(2)">Password Test</div>
+    <div class="tab-link" onclick="showSection(3)">Real-Life Demo</div>
+    <div class="tab-link" onclick="showSection(4)">Conclusion</div>
+</div>
+
+<!-- Section 1: Introduction -->
+<div id="section1" class="section active">
+<h2 class="text-2xl font-semibold mb-5">What is a Dictionary Attack?</h2>
+<div class="flex justify-center mb-5">
+    <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Animated lock" class="w-20 h-20 animate-bounce">
+</div>
+<p class="mb-4">A Dictionary Attack is when attackers use a pre-defined list of common passwords to gain access to accounts. It's faster than random guessing because many people reuse simple passwords.</p>
+<p class="mb-4">This simulator will help you understand the risks and test your password strength.</p>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+    <div class="p-4 bg-gray-800 rounded-lg shadow hover:scale-105 cursor-pointer" onclick="showTip('tip1')">
+        <h3 class="font-bold text-white">Tip 1</h3>
+        <p class="text-gray-300">Avoid common passwords.</p>
+    </div>
+    <div class="p-4 bg-gray-800 rounded-lg shadow hover:scale-105 cursor-pointer" onclick="showTip('tip2')">
+        <h3 class="font-bold text-white">Tip 2</h3>
+        <p class="text-gray-300">Use complex combinations.</p>
+    </div>
+    <div class="p-4 bg-gray-800 rounded-lg shadow hover:scale-105 cursor-pointer" onclick="showTip('tip3')">
+        <h3 class="font-bold text-white">Tip 3</h3>
+        <p class="text-gray-300">Long passwords resist attacks.</p>
+    </div>
+</div>
+<div id="tipDisplay" class="p-4 bg-gray-700 rounded-lg text-gray-300 mb-5 hidden"></div>
+
+<div class="p-4 bg-gray-800 rounded-lg mb-5">
+<h3 class="font-bold mb-2">Quiz: Which password is safe?</h3>
+<div class="space-y-2">
+    <button class="quiz-btn bg-gray-900 px-3 py-1 rounded shadow hover:bg-gray-700" onclick="checkAnswer(this,'wrong')">123456</button>
+    <button class="quiz-btn bg-gray-900 px-3 py-1 rounded shadow hover:bg-gray-700" onclick="checkAnswer(this,'wrong')">password</button>
+    <button class="quiz-btn bg-gray-900 px-3 py-1 rounded shadow hover:bg-gray-700" onclick="checkAnswer(this,'correct')">F!r3&Tr33H0u$e</button>
+    <button class="quiz-btn bg-gray-900 px-3 py-1 rounded shadow hover:bg-gray-700" onclick="checkAnswer(this,'wrong')">abcdef</button>
+</div>
+<div id="quizFeedback" class="mt-2 font-semibold"></div>
+</div>
+
+<!-- NEW GAME -->
+<div class="p-4 bg-gray-800 rounded-lg mb-5">
+  <h3 class="font-bold mb-2">🎮 Password Guess Game</h3>
+  <p class="mb-2">Enter your name and guess whether the shown password is <strong>Weak</strong> or <strong>Strong</strong>.</p>
+  <input type="text" id="playerName" class="password-input" placeholder="Enter your name">
+  <div id="guessArea" class="my-3 p-3 bg-gray-900 rounded text-center text-lg"></div>
+  <div class="flex justify-center space-x-4">
+    <button onclick="makeGuess('weak')" class="bg-red-600 px-4 py-2 rounded">Weak</button>
+    <button onclick="makeGuess('strong')" class="bg-green-600 px-4 py-2 rounded">Strong</button>
+  </div>
+  <p id="gameFeedback" class="mt-2 font-semibold"></p>
+  <p class="mt-2">Score: <span id="gameScore">0</span></p>
+  <h4 class="mt-4 font-bold">🏆 Leaderboard</h4>
+  <ul id="leaderboard" class="list-decimal pl-5 text-sm"></ul>
+</div>
+
+<div class="flex justify-end mt-5">
+    <button onclick="nextSection(1)" class="bg-blue-600 text-white px-4 py-2 rounded">Next</button>
+</div>
+</div>
+
+<!-- Section 2: Password Test -->
+<div id="section2" class="section">
+<h2 class="text-2xl font-semibold mb-5">Test Your Password</h2>
+<form id="passwordForm">
+    <label>Username</label>
+    <input type="text" class="password-input" placeholder="Enter username">
+    <label>Password</label>
+    <input type="password" id="password" class="password-input" placeholder="Enter password">
+    <div class="strength-bar"><div id="strengthFill" class="strength-fill"></div></div>
+    <div id="feedback" class="mt-2 text-sm"></div>
+    <button type="button" onclick="checkStrength()" class="mt-5 bg-blue-600 text-white px-4 py-2 rounded">Check Strength</button>
+</form>
+<div class="flex justify-between mt-5">
+    <button onclick="prevSection(2)" class="bg-gray-600 text-white px-4 py-2 rounded">Previous</button>
+    <button onclick="nextSection(2)" class="bg-blue-600 text-white px-4 py-2 rounded" id="next2" disabled>Next</button>
+</div>
+</div>
+
+<!-- Section 3: Real-Life Demo -->
+<div id="section3" class="section">
+<h2 class="text-2xl font-semibold mb-5">Dictionary Attack Demo</h2>
+<p>Enter a password and see if it can be cracked using a common wordlist.</p>
+<div class="fake-login mb-4">
+    <label>Username:</label>
+    <input type="text" id="demoUsername" class="password-input" placeholder="Your username">
+    <label>Password:</label>
+    <input type="password" id="demoPassword" class="password-input" placeholder="Try a common password">
+    <button onclick="runDemo()" class="mt-3 bg-red-600 text-white px-4 py-2 rounded" id="runDemoBtn">Simulate Attack</button>
+</div>
+<div class="flex justify-between mt-5">
+    <button onclick="prevSection(3)" class="bg-gray-600 text-white px-4 py-2 rounded">Previous</button>
+    <button onclick="nextSection(3)" class="bg-blue-600 text-white px-4 py-2 rounded" id="next3" disabled>Next</button>
+</div>
+</div>
+
+<!-- Section 4: Conclusion -->
+<div id="section4" class="section">
+<h2 class="text-2xl font-semibold mb-5">Preventing Dictionary Attacks</h2>
+<ul class="list-disc pl-5">
+    <li>Use long, complex, unique passwords.</li>
+    <li>Avoid common words or patterns.</li>
+    <li>Enable two-factor authentication.</li>
+    <li>Use a password manager.</li>
+</ul>
+<div class="flex justify-start mt-5">
+    <button onclick="prevSection(4)" class="bg-gray-600 text-white px-4 py-2 rounded">Previous</button>
+</div>
+</div>
+
+<!-- Demo Modal -->
+<div id="demoModal" class="demo-modal">
+<div class="demo-content">
+    <h3 class="text-center font-bold text-red-500">🚨 PASSWORD CRACKED! 🚨</h3>
+    <p>Your password matched a common word in the dictionary!</p>
+    <p><strong>Username:</strong> <span id="capturedUsername"></span></p>
+    <p><strong>Password:</strong> <span id="capturedPassword"></span></p>
+    <button onclick="closeDemo()" class="mt-3 bg-green-600 text-white px-4 py-2 rounded">OK</button>
+</div>
+</div>
+
+<script>
+// Navigation
+function showSection(id){
+    const sections=document.querySelectorAll('.section');
+    sections.forEach(s=>s.classList.remove('active'));
+    document.getElementById('section'+id).classList.add('active');
+    const tabs=document.querySelectorAll('.tab-link');
+    tabs.forEach(t=>t.classList.remove('active'));
+    tabs[id-1].classList.add('active');
+}
+function nextSection(currentId){navigateToSection(currentId+1);}
+function prevSection(currentId){navigateToSection(currentId-1);}
+function navigateToSection(sectionId){
+    const sections=document.querySelectorAll('.section');
+    const tabs=document.querySelectorAll('.tab-link');
+    if(sectionId>=1 && sectionId<=sections.length){
+        sections.forEach(s=>s.classList.remove('active'));
+        tabs.forEach(t=>t.classList.remove('active'));
+        document.getElementById('section'+sectionId).classList.add('active');
+        tabs[sectionId-1].classList.add('active');
+        window.scrollTo({top:0, behavior:'smooth'});
+    }
+}
+
+// Tips & Quiz
+function showTip(tipId){
+    const tipDisplay=document.getElementById('tipDisplay'); tipDisplay.classList.remove('hidden');
+    if(tipId==='tip1') tipDisplay.textContent='Avoid using common passwords.';
+    if(tipId==='tip2') tipDisplay.textContent='Combine letters, numbers, and symbols for uniqueness.';
+    if(tipId==='tip3') tipDisplay.textContent='Long passwords resist dictionary attacks.';
+}
+function checkAnswer(btn,status){
+    const feedback=document.getElementById('quizFeedback');
+    if(status==='correct'){feedback.textContent='✅ Correct! Safe against dictionary attacks.'; feedback.classList.remove('text-red-600'); feedback.classList.add('text-green-500');}
+    else{feedback.textContent='❌ Not safe!'; feedback.classList.remove('text-green-500'); feedback.classList.add('text-red-500');}
+}
+
+// Password Strength
+function checkStrength(){
+    const password=document.getElementById('password').value;
+    const fill=document.getElementById('strengthFill'); const feedback=document.getElementById('feedback'); let strength=0;
+    fill.className='strength-fill';
+    if(password.length>=8) strength++; if(/[a-z]/.test(password)) strength++;
+    if(/[A-Z]/.test(password)) strength++; if(/\d/.test(password)) strength++;
+    if(/[^a-zA-Z\d]/.test(password)) strength++;
+    const strengthLevels=['weak','fair','good','strong'];
+    fill.style.width=(strength/5*100)+'%';
+    fill.classList.add(strengthLevels[Math.min(3,Math.floor(strength/2))]);
+    feedback.textContent=`Strength: ${strengthLevels[Math.min(3,Math.floor(strength/2))]} (${strength}/5 criteria met)`;
+    document.getElementById('next2').disabled=false;
+}
+
+// Demo Simulation
+const commonPasswords=["123456","password","qwerty","abc123","letmein"];
+function runDemo(){
+    const username=document.getElementById('demoUsername').value;
+    const password=document.getElementById('demoPassword').value;
+    if(password===''){alert('Enter a password'); return;}
+    document.getElementById('capturedUsername').textContent=username||'No username entered';
+    document.getElementById('capturedPassword').textContent=password;
+    document.getElementById('demoModal').style.display='flex';
+    document.getElementById('next3').disabled=false;
+    if(commonPasswords.includes(password.toLowerCase())){
+        document.querySelector('#demoModal h3').textContent='🚨 PASSWORD CRACKED! 🚨';
+    }else{
+        document.querySelector('#demoModal h3').textContent='✅ Password not found in dictionary';
+    }
+}
+function closeDemo(){
+    document.getElementById('demoModal').style.display='none';
+    document.getElementById('demoUsername').value=''; 
+    document.getElementById('demoPassword').value='';
+}
+
+// Game Logic with Player Name
+const samplePasswords=["123456","sunshine","letmein","iloveyou","qwerty","F!r3&Tr33H0u$e","abc123","dragon","football","C@tL0v3r2025"];
+let currentGuessIndex=0; let score=0; let leaderboard=[];
+
+function newGuess(){
+    document.getElementById('guessArea').textContent=samplePasswords[currentGuessIndex];
+}
+function makeGuess(choice){
+    const password=samplePasswords[currentGuessIndex];
+    let correct=(password.length<8 || !/[A-Z]/.test(password) || !/\d/.test(password) || !/[^a-zA-Z\d]/.test(password)) ? "weak":"strong";
+    const feedback=document.getElementById('gameFeedback');
+    if(choice===correct){score++; feedback.textContent="✅ Correct!"; feedback.classList.add('text-green-500');}
+    else{feedback.textContent="❌ Wrong!"; feedback.classList.add('text-red-500');}
+    document.getElementById('gameScore').textContent=score;
+    currentGuessIndex++;
+    if(currentGuessIndex>=samplePasswords.length){
+        const player=document.getElementById('playerName').value||"Anonymous";
+        leaderboard.push({name:player,score:score});
+        leaderboard.sort((a,b)=>b.score-a.score);
+        updateLeaderboard();
+        score=0; currentGuessIndex=0;
+    }
+    newGuess();
+}
+function updateLeaderboard(){
+    const list=document.getElementById('leaderboard');
+    list.innerHTML="";
+    leaderboard.slice(0,5).forEach(entry=>{
+        const li=document.createElement('li');
+        li.textContent=`${entry.name}: ${entry.score}`;
+        list.appendChild(li);
+    });
+}
+newGuess();
+</script>
+</body>
+</html>

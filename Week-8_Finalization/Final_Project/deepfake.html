@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake Demo: AI-Generated Fakes for Fraud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .option-btn {
+            background: #333;
+            border: 1px solid #fff;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeIn 1s ease-in-out;
+        }
+        .option-btn:hover {
+            background: #555;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #111;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            animation: popup 0.8s ease-out;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes popup {
+            from { opacity: 0; scale: 0.8; }
+            to { opacity: 1; scale: 1; }
+        }
+        .glow {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        .slide-in {
+            animation: slideIn 0.8s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .small-img {
+            width: 200px;
+        }
+        button {
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background-color: #333;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        .demo-output {
+            animation: appear 0.5s ease-in-out;
+        }
+        @keyframes appear {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-5">
+    <!-- Main Menu -->
+    <div id="menu" class="options">
+        <h1 class="text-5xl font-bold mb-10 glow">Deepfake</h1>
+        <button class="option-btn" onclick="showPage('intro')">Introduction to Deepfakes</button>
+        <button class="option-btn" onclick="showPage('how-works')">How Deepfakes Work</button>
+        <button class="option-btn" onclick="showPage('where-works')">Where Used for Fraud</button>
+        <button class="option-btn" onclick="showPage('examples')">Real-Life Examples</button>
+        <button class="option-btn" onclick="showPage('demo')">Demo</button>
+    </div>
+
+    <!-- Pages as Popups -->
+    <section id="intro" class="page">
+        <button onclick="closePage()" class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded">Close</button>
+        <h2 class="text-4xl font-bold mb-5 glow">Understanding Deepfakes</h2>
+        <p class="text-lg mb-5 slide-in">Deepfakes are AI-generated fake videos or audio where someone's likeness is manipulated, often using machine learning to swap faces or voices. This technology can be misused for fraud, such as impersonating individuals to steal personal data, create fake identities, or commit scams involving sensitive information like bank details or identities.</p>
+        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/54e1073a-a88d-46a5-8e33-828c2e7b6cfe.png" alt="AI-generated image of a blurred face morphing into another with cybernetic overlays, symbolizing deepfake technology in a dark digital environment" class="small-img rounded mb-5 slide-in">
+        <p class="text-sm slide-in">In this demo, we'll explore how it works, its applications in fraud, real-life examples, and an interactive simulation.</p>
+    </section>
+
+    <section id="how-works" class="page">
+        <button onclick="closePage()" class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded">Close</button>
+        <h2 class="text-4xl font-bold mb-5 glow">How Deepfakes Work</h2>
+        <p class="text-lg mb-5 slide-in">Deepfakes rely on Generative Adversarial Networks (GANs) or similar AI models like Autoencoders. The AI trains on large datasets of images/videos of a target person, then generates new content by mapping features (e.g., facial expressions) onto another source. This creates realistic fakes without requiring high expertise. For fraud, it's used to forge videos/audio for impersonation or misinformation targeting personal data theft.</p>
+        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/40bfe723-09a5-40d7-8b30-e8577f4cd962.png" alt="Interactive diagram showing GAN arrows with neural layers and face swap animations in a tech lab setting" class="small-img rounded mb-5 slide-in">
+        <p class="text-sm slide-in">Visualization of GAN process in deepfake creation.</p>
+    </section>
+
+    <section id="where-works" class="page">
+        <button onclick="closePage()" class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded">Close</button>
+        <h2 class="text-4xl font-bold mb-5 glow">Where Deepfakes Are Used in Fraud</h2>
+        <p class="text-lg mb-5 slide-in">Deepfakes exploit personal data for scams like voice phishing (vishing), fake video calls, or forged IDs. They're common in financial fraud, identity theft, blackmail, or spreading fake news to manipulate markets. Vulnerable areas include online banking, video conferencing, and social media authentication.</p>
+        <ul class="list-disc list-inside mb-10 slide-in">
+            <li>Financial Scams: Impersonating executives in video calls to request wire transfers.</li>
+            <li>Identity Theft: Creating fake profiles or documents with stolen data.</li>
+            <li>Blackmail: Generating compromising content using personal photos/videos.</li>
+        </ul>
+        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/e4452196-8315-4956-9167-79d886f4bca1.png" alt="Illustration of a computer screen displaying fraudulent video call with deepfake face and money transfer icons" class="small-img rounded slide-in">
+    </section>
+
+    <section id="examples" class="page">
+        <button onclick="closePage()" class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded">Close</button>
+        <h2 class="text-4xl font-bold mb-5 glow">Real-Life Examples</h2>
+        <p class="text-lg mb-5 slide-in">Don't worry, these are educational; we're not enabling fraud here. Deepfakes have been used in real scenarios like the 2019 deepfake of Mark Zuckerberg stating "Facebook is shutting down," which could manipulate stock prices. Another case involved fake videos of celebrities in adult content, leading to privacy issues. In fraud, a 2021 incident had scammers using deepfake audio to impersonate a CEO's voice, stealing $243,000 from a UK company.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10 slide-in">
+            <div class="bg-gray-800 p-5 rounded">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c3a6fe03-35a2-4306-b024-dc8e09b9e832.png" alt="Digital recreation of Mark Zuckerberg's face with manipulated expression in a virtual news overlay" class="small-img rounded mb-3">
+                <p class="text-sm">2019 Zuckerberg Deepfake Scare</p>
+            </div>
+            <div class="bg-gray-800 p-5 rounded">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8e27873d-166d-45a2-98a2-2fda21056a27.png" alt="Animated office scene with audio waves and fake CEO figure gossiping fraudulently" class="small-img rounded mb-3">
+                <p class="text-sm">2021 Audio Deepfake in Business Fraud</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo" class="page">
+        <button onclick="closePage()" class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded">Close</button>
+        <h2 class="text-4xl font-bold mb-5 glow">Deepfake Demo Simulation</h2>
+        <p class="text-lg mb-5 slide-in">Click the button to simulate uploading an image. It will directly show the deepfake result with animations.</p>
+        <button onclick="showResult()" class="bg-white text-black px-6 py-3 rounded pulse mb-5">Upload and Generate Deepfake</button>
+        <div id="result" class="demo-output bg-gray-800 p-5 rounded">
+            <p class="slide-in">Deepfake Result: Original swapped with a known public figure's face (simulated).</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="flex flex-col items-center slide-in">
+                    <p>Original:</p>
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5a245470-6993-4747-8a94-d7f0b2d91784.png" alt="Plain male portrait with neutral expression, short hair, simple background for fake demonstration" class="small-img rounded">
+                </div>
+                <div class="flex flex-col items-center slide-in">
+                    <p>Deepfaked Output:</p>
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/52d44acd-fadf-4431-b82a-da7d9c7e683a.png" alt="Modified portrait with superimposed celebrity features, altered smile and eyes in deceptive style" class="small-img rounded">
+                </div>
+            </div>
+            <p class="mt-5 text-sm slide-in">Note: This is a mock-up. In reality, deepfakes require powerful AI and can be illegal for misuse.</p>
+        </div>
+    </section>
+
+    <script>
+        const pages = ['intro', 'how-works', 'where-works', 'examples', 'demo'];
+        const menu = document.getElementById('menu');
+
+        function showPage(pageId) {
+            // Hide menu and show page
+            menu.style.opacity = '0';
+            menu.style.pointerEvents = 'none';
+            const page = document.getElementById(pageId);
+            page.classList.add('active');
+            setTimeout(() => {
+                page.style.opacity = '1';
+            }, 100); // Slight delay for popup
+        }
+
+        function closePage() {
+            const activePage = document.querySelector('.page.active');
+            if (activePage) {
+                activePage.classList.remove('active');
+            }
+            menu.style.opacity = '1';
+            menu.style.pointerEvents = 'auto';
+            // Hide result if open
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function showResult() {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+        }
+
+        // Initially hide result
+        document.getElementById('result').style.display = 'none';
+    </script>
+</body>
+</html>
+</content>
+</create_file>

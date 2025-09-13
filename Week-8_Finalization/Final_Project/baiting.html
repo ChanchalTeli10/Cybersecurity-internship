@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Baiting Awareness Training</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    color: #ffffff;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(17, 17, 17, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .scoreboard {
+    display: flex;
+    gap: 25px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .scoreboard div {
+    text-align: center;
+    min-width: 80px;
+  }
+  
+  .score-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    opacity: 0.8;
+  }
+  
+  .score-value {
+    font-size: 24px;
+    font-weight: 700;
+  }
+  
+  .correct .score-value {
+    color: #4ade80;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+  }
+  
+  .wrong .score-value {
+    color: #f87171;
+    text-shadow: 0 0 10px rgba(248, 113, 113, 0.3);
+  }
+  
+  main {
+    padding: 100px 25px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .welcome-section {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .welcome-section h2 {
+    font-size: 28px;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .welcome-section p {
+    font-size: 16px;
+    color: #cccccc;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .scenarios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+  }
+  
+  .card {
+    background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 25px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .card:hover:not(.disabled) {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+  
+  .card:hover:not(.disabled)::before {
+    opacity: 1;
+  }
+  
+  .card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+  
+  .card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    font-size: 24px;
+  }
+  
+  .physical-bait .card-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  }
+  
+  .digital-bait .card-icon {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  }
+  
+  .safe .card-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+  
+  .card h2 {
+    font-size: 20px;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  
+  .card p {
+    font-size: 14px;
+    color: #aaaaaa;
+    margin-bottom: 15px;
+    line-height: 1.5;
+  }
+  
+  .card-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .physical-badge {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+  
+  .digital-badge {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  
+  .safe-badge {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  
+  .card .checkmark {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #10b981;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+  }
+  
+  /* Modal styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  
+  .modal-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .modal {
+    background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+    border-radius: 20px;
+    max-width: 600px;
+    width: 100%;
+    padding: 30px 35px;
+    box-sizing: border-box;
+    text-align: center;
+    color: #eee;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    position: relative;
+    animation: slideUp 0.4s ease;
+  }
+  
+  .modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 1;
+  }
+  
+  .modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .modal h3 {
+    font-size: 26px;
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+  
+  .warning-modal h3 {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .success-modal h3 {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .modal p {
+    font-size: 17px;
+    color: #ddd;
+    margin-bottom: 25px;
+    line-height: 1.5;
+  }
+  
+  .modal-content {
+    margin: 20px 0 30px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 15px;
+    color: #ccc;
+    white-space: pre-line;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .modal-btn {
+    padding: 14px 30px;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 140px;
+  }
+  
+  .btn-accept {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+  }
+  
+  .btn-accept:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.5);
+  }
+  
+  .btn-reject {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+  }
+  
+  .btn-reject:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.5);
+  }
+  
+  .link {
+    color: #f87171;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 600;
+    transition: color 0.3s;
+  }
+  
+  .link:hover {
+    color: #ef4444;
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  
+  .pulse {
+    animation: pulse 0.5s ease;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🛡️</div>
+    <h1>Baiting Awareness</h1>
+  </div>
+  <div class="scoreboard">
+    <div class="correct">
+      <div class="score-label">Correct</div>
+      <div class="score-value" id="correct-score">0</div>
+    </div>
+    <div class="wrong">
+      <div class="score-label">Wrong</div>
+      <div class="score-value" id="wrong-score">0</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="welcome-section">
+    <h2>Baiting Simulation Training</h2>
+    <p>Learn to identify and avoid baiting attacks by practicing with realistic scenarios. Click on any scenario below to begin.</p>
+  </div>
+  
+  <div class="scenarios" id="scenarios-container">
+    <!-- Scenario cards inserted by JS -->
+  </div>
+</main>
+
+<!-- Scenario Modal -->
+<div class="modal-overlay" id="scenario-modal">
+  <div class="modal">
+    <div class="modal-close" id="btn-close-modal" title="Close">×</div>
+    <h3 id="modal-title"></h3>
+    <p id="modal-description"></p>
+    <div class="modal-content" id="modal-extra"></div>
+    <div class="modal-buttons">
+      <button class="modal-btn btn-accept" id="btn-accept">Accept</button>
+      <button class="modal-btn btn-reject" id="btn-reject">Reject</button>
+    </div>
+  </div>
+</div>
+
+<!-- Link Warning Modal -->
+<div class="modal-overlay" id="link-warning-modal">
+  <div class="modal warning-modal">
+    <div class="modal-close" id="btn-close-link-warning" title="Close">×</div>
+    <h3>⚠️ Security Warning!</h3>
+    <p>You clicked a suspicious link or accepted a risky bait. This is considered a mistake.</p>
+    <div class="modal-content" id="link-warning-explanation"></div>
+    <div class="modal-buttons">
+      <button class="modal-btn btn-reject" id="btn-close-link-warning-ok">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal-overlay" id="success-modal">
+  <div class="modal success-modal">
+    <div class="modal-close" id="btn-close-success" title="Close">×</div>
+    <h3>✅ Correct Decision!</h3>
+    <p>You made the right choice and avoided a baiting attack.</p>
+    <div class="modal-content" id="success-explanation"></div>
+    <div class="modal-buttons">
+      <button class="modal-btn btn-reject" id="btn-close-success-ok">Continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Scenarios data with detailed explanations
+  const scenarios = [
+    {
+      id: 'usb',
+      title: 'Found USB Drive',
+      description: 'You found a USB drive labeled "Confidential" in the parking lot. What do you do?',
+      baitType: 'physical',
+      isBait: true,
+      extraHTML: `<div style="text-align: center; margin: 15px 0;">
+        <div style="width: 70px; height: 25px; background: linear-gradient(135deg, #666, #999); border-radius: 6px; position: relative; margin: 0 auto;">
+          <div style="width: 18px; height: 10px; background: #333; position: absolute; left: -18px; top: 7px; border-radius: 3px;"></div>
+        </div>
+        <p style="margin-top: 10px; color: #f59e0b; font-weight: 600;">"Confidential" USB Drive</p>
+      </div>`,
+      typeClass: 'physical-bait',
+      explanation: `🔒 BAITING WITH PHYSICAL DEVICES
+
+- USB drives found in public places often contain malware or ransomware
+- Attackers use curiosity and urgency ("Confidential" label) to trick victims
+- Plugging in unknown USB drives can:
+  - Install keyloggers to steal passwords
+  - Deploy ransomware to encrypt files
+  - Create backdoors for remote access
+  - Steal sensitive data automatically
+
+✅ SAFE PRACTICES:
+- Never plug in found USB drives
+- Report them to IT security immediately
+- Use company-approved devices only
+- Enable USB port security controls`
+    },
+    {
+      id: 'download',
+      title: 'Free Software Offer',
+      description: 'A pop-up offers a free premium software download. Limited time offer!',
+      baitType: 'digital',
+      isBait: true,
+      extraHTML: `<p style="text-align: center;">Download link: <span class="link" id="download-link">free-software-download.com</span></p>
+      <p style="color: #ef4444; text-align: center; margin-top: 10px; font-weight: 600;">⚠️ This looks suspicious!</p>`,
+      typeClass: 'digital-bait',
+      explanation: `💻 SOFTWARE BAITING ATTACKS
+
+- Free software offers often bundle malware with the installation
+- Fake download sites mimic legitimate software vendors
+- Common risks include:
+  - Trojan horses hidden in installers
+  - Adware and browser hijackers
+  - Cryptocurrency miners
+  - Data-stealing malware
+
+🛡️ PROTECTION TIPS:
+- Download software only from official vendor websites
+- Verify digital signatures and checksums
+- Use company-approved software repositories
+- Be wary of "cracked" or pirated software
+- Keep antivirus software updated`
+    },
+    {
+      id: 'giftcard',
+      title: 'Free Gift Card',
+      description: 'You receive an email offering a free $100 gift card if you click the link.',
+      baitType: 'digital',
+      isBait: true,
+      extraHTML: `<div style="text-align: center;">
+        <div style="width: 100px; height: 60px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 10px; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; transform: rotate(-5deg);">
+          $100
+        </div>
+        <p style="margin-top: 15px;">Claim your gift card here: <span class="link" id="giftcard-link">claim-giftcard-now.com</span></p>
+      </div>`,
+      typeClass: 'digital-bait',
+      explanation: `🎁 GIFT CARD SCAMS
+
+- Fake gift card offers are common phishing tactics
+- These scams typically:
+  - Redirect to phishing sites to steal credentials
+  - Install malware through fake "claim" processes
+  - Request personal information for "verification"
+  - Lead to financial fraud and identity theft
+
+💰 RED FLAGS:
+- Unsolicited gift card offers
+- Urgent "limited time" claims
+- Suspicious email addresses
+- Requests for personal information
+- Poor website design and grammar
+
+✅ SAFE APPROACH:
+- Never claim unsolicited gift cards
+- Verify offers through official channels
+- Report suspicious emails to IT
+- Use company-approved reward systems`
+    },
+    {
+      id: 'safe-software',
+      title: 'Official Software Update',
+      description: 'Your computer notifies you of an official software update from the vendor.',
+      baitType: 'digital',
+      isBait: false,
+      extraHTML: `<div style="text-align: center; padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.3);">
+        <p style="color: #10b981; font-weight: 600;">✓ Verified Vendor</p>
+        <p>Update link: <span style="color:#10b981; font-weight: 600;">vendor-software.com/update</span></p>
+      </div>`,
+      typeClass: 'safe',
+      explanation: `✅ LEGITIMATE SOFTWARE UPDATE
+
+This is a safe software update notification with proper verification:
+
+- Comes from known vendor domain (vendor-software.com)
+- Uses secure HTTPS connection
+- Matches official vendor branding
+- No urgent or threatening language
+- No requests for unusual permissions
+
+🔍 VERIFICATION STEPS:
+- Check the sender's email address
+- Verify the website URL matches official vendor
+- Look for proper digital signatures
+- Confirm through official vendor support if unsure
+
+🛡️ BEST PRACTICES:
+- Keep software updated regularly
+- Use automatic updates when available
+- Download only from official sources
+- Verify update notifications through official apps`
+    },
+    {
+      id: 'usb-safe',
+      title: 'Company USB Drive',
+      description: 'You receive a USB drive from your IT department with company software.',
+      baitType: 'physical',
+      isBait: false,
+      extraHTML: `<div style="text-align: center; margin: 15px 0;">
+        <div style="width: 70px; height: 25px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 6px; position: relative; margin: 0 auto;">
+          <div style="width: 18px; height: 10px; background: #065f46; position: absolute; left: -18px; top: 7px; border-radius: 3px;"></div>
+        </div>
+        <p style="margin-top: 10px; color: #10b981; font-weight: 600;">IT Department - Verified</p>
+      </div>`,
+      typeClass: 'safe',
+      explanation: `✅ TRUSTED COMPANY DEVICE
+
+This USB drive is properly verified and safe to use:
+
+- Comes from known IT department source
+- Has proper company branding and labeling
+- Distributed through official channels
+- Used for legitimate business purposes
+
+🔐 SECURITY PROTOCOLS:
+- Company devices are pre-scanned for malware
+- IT department follows security protocols
+- Devices are encrypted and secured
+- Proper asset tracking and management
+
+📋 SAFE USAGE:
+- Use only for intended business purposes
+- Follow company data handling policies
+- Return to IT when task is completed
+- Report any suspicious behavior immediately
+
+Remember: Even with trusted sources, always practice good security hygiene when handling removable media.`
+    }
+  ];
+
+  const scenariosContainer = document.getElementById('scenarios-container');
+  const scenarioModal = document.getElementById('scenario-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalDescription = document.getElementById('modal-description');
+  const modalExtra = document.getElementById('modal-extra');
+  const btnAccept = document.getElementById('btn-accept');
+  const btnReject = document.getElementById('btn-reject');
+  const btnCloseModal = document.getElementById('btn-close-modal');
+  const linkWarningModal = document.getElementById('link-warning-modal');
+  const linkWarningExplanation = document.getElementById('link-warning-explanation');
+  const btnCloseLinkWarning = document.getElementById('btn-close-link-warning-ok');
+  const successModal = document.getElementById('success-modal');
+  const successExplanation = document.getElementById('success-explanation');
+  const btnCloseSuccess = document.getElementById('btn-close-success-ok');
+  const correctScoreEl = document.getElementById('correct-score');
+  const wrongScoreEl = document.getElementById('wrong-score');
+
+  let currentScenario = null;
+  let scores = { correct: 0, wrong: 0 };
+  let completed = new Set();
+
+  // Render scenario cards
+  function renderScenarios() {
+    scenariosContainer.innerHTML = '';
+    scenarios.forEach(s => {
+      const card = document.createElement('div');
+      card.className = `card ${s.typeClass}`;
+      if (completed.has(s.id)) {
+        card.classList.add('disabled');
+        const check = document.createElement('div');
+        check.className = 'checkmark';
+        check.textContent = '✓';
+        card.appendChild(check);
+      }
+      
+      const icon = s.typeClass === 'physical-bait' ? '💾' : 
+                  s.typeClass === 'digital-bait' ? '📥' : '✅';
+                  
+      const badgeText = s.typeClass === 'physical-bait' ? 'Physical Bait' : 
+                       s.typeClass === 'digital-bait' ? 'Digital Bait' : 'Safe';
+                       
+      const badgeClass = s.typeClass === 'physical-bait' ? 'physical-badge' : 
+                        s.typeClass === 'digital-bait' ? 'digital-badge' : 'safe-badge';
+      
+      card.innerHTML = `
+        <div class="card-icon">${icon}</div>
+        <h2>${s.title}</h2>
+        <p>${s.description}</p>
+        <span class="card-badge ${badgeClass}">${badgeText}</span>
+      `;
+      
+      card.addEventListener('click', () => {
+        if (!completed.has(s.id)) openScenario(s.id);
+      });
+      scenariosContainer.appendChild(card);
+    });
+  }
+
+  // Open scenario modal
+  function openScenario(id) {
+    currentScenario = scenarios.find(s => s.id === id);
+    modalTitle.textContent = currentScenario.title;
+    modalDescription.textContent = currentScenario.description;
+    modalExtra.innerHTML = currentScenario.extraHTML || '';
+    scenarioModal.classList.add('active');
+
+    // Add link click handlers if bait with links
+    if (currentScenario.isBait && currentScenario.baitType === 'digital') {
+      const downloadLink = document.getElementById('download-link');
+      const giftcardLink = document.getElementById('giftcard-link');
+      if (downloadLink) downloadLink.onclick = () => handleLinkClick();
+      if (giftcardLink) giftcardLink.onclick = () => handleLinkClick();
+    }
+  }
+
+  // Handle link clicks in bait scenarios
+  function handleLinkClick() {
+    if (!currentScenario) return;
+    
+    // Count as wrong answer immediately
+    scores.wrong++;
+    wrongScoreEl.textContent = scores.wrong;
+    wrongScoreEl.classList.add('pulse');
+    setTimeout(() => wrongScoreEl.classList.remove('pulse'), 500);
+    
+    // Mark scenario as completed
+    completed.add(currentScenario.id);
+    renderScenarios();
+    
+    // Show warning with detailed explanation
+    linkWarningExplanation.textContent = currentScenario.explanation;
+    linkWarningModal.classList.add('active');
+    scenarioModal.classList.remove('active');
+  }
+
+  // Close scenario modal
+  function closeScenario() {
+    scenarioModal.classList.remove('active');
+    currentScenario = null;
+  }
+
+  // Handle user decision
+  function handleDecision(isAccept) {
+    if (!currentScenario) return;
+
+    // Accept means user falls for bait
+    // Reject means user avoids bait
+    let userCorrect = false;
+    if (currentScenario.isBait) {
+      userCorrect = !isAccept; // Reject bait is correct
+    } else {
+      userCorrect = isAccept; // Accept safe is correct
+    }
+
+    if (userCorrect) {
+      scores.correct++;
+      correctScoreEl.textContent = scores.correct;
+      correctScoreEl.classList.add('pulse');
+      setTimeout(() => correctScoreEl.classList.remove('pulse'), 500);
+      
+      // Show success modal with explanation
+      successExplanation.textContent = currentScenario.explanation;
+      successModal.classList.add('active');
+    } else {
+      scores.wrong++;
+      wrongScoreEl.textContent = scores.wrong;
+      wrongScoreEl.classList.add('pulse');
+      setTimeout(() => wrongScoreEl.classList.remove('pulse'), 500);
+      
+      // Show warning modal with explanation
+      linkWarningExplanation.textContent = currentScenario.explanation;
+      linkWarningModal.classList.add('active');
+    }
+
+    completed.add(currentScenario.id);
+    renderScenarios();
+    closeScenario();
+  }
+
+  // Close modals
+  function closeLinkWarning() {
+    linkWarningModal.classList.remove('active');
+  }
+
+  function closeSuccess() {
+    successModal.classList.remove('active');
+  }
+
+  // Event listeners
+  btnAccept.addEventListener('click', () => handleDecision(true));
+  btnReject.addEventListener('click', () => handleDecision(false));
+  btnCloseModal.addEventListener('click', closeScenario);
+  btnCloseLinkWarning.addEventListener('click', closeLinkWarning);
+  btnCloseSuccess.addEventListener('click', closeSuccess);
+
+  // Close modal when clicking outside
+  scenarioModal.addEventListener('click', (e) => {
+    if (e.target === scenarioModal) closeScenario();
+  });
+  
+  linkWarningModal.addEventListener('click', (e) => {
+    if (e.target === linkWarningModal) closeLinkWarning();
+  });
+  
+  successModal.addEventListener('click', (e) => {
+    if (e.target === successModal) closeSuccess();
+  });
+
+  // Initial render
+  renderScenarios();
+</script>
+
+</body>
+</html>

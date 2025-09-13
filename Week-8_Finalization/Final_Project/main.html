@@ -1,1 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cyber Security Learning Portal</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #000; /* Black background */
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        h1 {
+            font-size: 3em;
+            margin: 0;
+            color: #fff; /* White color for main title */
+            text-shadow: 2px 2px #000;
+        }
+        nav {
+            background: rgba(0, 0, 0, 0.9);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #219ebc; /* Updated blue accent */
+        }
+        nav button {
+            background: transparent;
+            border: none;
+            padding: 15px 20px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background 0.3s, color 0.3s, transform 0.3s;
+            font-weight: 500;
+        }
+        nav button:hover, nav button.active {
+            background: rgba(33, 158, 188, 0.3); /* Updated rgba for #219ebc */
+            color: #219ebc; /* Updated from blue */
+            transform: translateY(-3px);
+        }
+        .tab-content {
+            display: none;
+            flex-grow: 1;
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h2 {
+            color: #219ebc; /* Updated from blue */
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #219ebc; /* Updated */
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        .subtopic {
+            margin: 30px 0;
+        }
+         .subtopic button {
+            padding: 12px 24px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border-radius: 12px;
+            min-width: 120px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            background-color: #219ebc; /* Your theme color */
+            color: white;
+            border: none;
+            margin-right: 10px;
+        }
 
+        .subtopic button:hover {
+            background-color: #1b7a99; /* Slightly darker on hover */
+          }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #000;
+            color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid #219ebc; /* Updated border */
+        }
+        .modal h2 {
+            color: #219ebc; /* Updated */
+            margin-bottom: 20px;
+        }
+        .modal p {
+            margin-bottom: 20px;
+        }
+        .real-life-btn {
+            background: #28a745; /* Green color */
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background 0.3s, transform 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            margin-right: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .real-life-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+        .close-btn {
+            background: #6c757d;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: background 0.3s;
+        }
+        .close-btn:hover {
+            background: #5a6268;
+        }
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+            }
+            nav button {
+                width: 100%;
+                padding: 12px;
+            }
+            h1 {
+                font-size: 2.5em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            .tab-content {
+                padding: 15px;
+            }
+            .subtopic button, .real-life-btn {
+                width: 90%;
+                margin: 5px auto;
+            }
+            .modal-content {
+                padding: 20px;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Threats Behind the Screen</h1>
+    </header>
+    <nav id="tab-nav">
+        <button class="tab-btn active" data-tab="home">Home</button>
+        <button class="tab-btn" data-tab="social-eng">Social Engineering Attacks</button>
+        <button class="tab-btn" data-tab="malware">Malware Attacks</button>
+        <button class="tab-btn" data-tab="password">Password Attacks</button>
+        <button class="tab-btn" data-tab="identity">Identity & Privacy Attacks</button>
+        <button class="tab-btn" data-tab="review">Review</button>
+    </nav>
+    
+    <main>
+        <!-- Home Tab -->
+        <div class="tab-content active" id="home">
+            <center>
+                <img src="image.jpg" alt="Cybersecurity illustration" style="max-width: 50%; height: auto; margin-bottom: 50px;" />
+            </center>
+            
+    
+    
+            <h2>What is Cybersecurity?</h2>
+            <p>
+                Cybersecurity is the practice of protecting systems, networks, and programs from digital attacks.These attacks usually aim to 
+                access, change, or destroy sensitive information; extort money from users, or disrupt normal business operations.In today’s 
+                digital world, almost everything — from banking, shopping, and communication to healthcare and government services — depends 
+                on technology. This makes protecting digital assets extremely important. Cybersecurity works like a shield that defends 
+                individuals, organizations, and even nations from cyber threats such as hackers, malware, phishing, and data breaches.
+            </p>
+            <p style="color: white; font-weight: 600; margin-top: 1em;">Key goals of cybersecurity are:</p>
+            <ul>
+                <li>Protects data and infrastructure from unauthorized access and damage.</li>
+                <li>Mitigates risks posed by hackers, malware, and social engineering.</li>
+                <li>Ensures confidentiality, integrity, and availability of information.</li>
+                <li>Supports compliance with legal and regulatory requirements.</li>
+            </ul>
+            <h2>What Can You Expect from Learning Here?</h2>
+            <p>On this portal, you'll dive deep into various cyber threats, learn prevention strategies, and explore real-world scenarios. Our interactive modules cover attack types, subtopics, and practical examples to build your knowledge and awareness. Engage with content to become proficient in defending against cyber risks.</p>
+        </div>
+        
+        <!-- Social Engineering Attacks Tab -->
+        <div class="tab-content" id="social-eng">
+            <h2>Social Engineering Attacks</h2>
+            <p style="color: white; line-height: 1.5;">
+            A social engineering attack is a cybersecurity threat where attackers trick or manipulate people into revealing sensitive 
+            information or performing actions that compromise security. Instead of exploiting software or hardware flaws, these attacks exploit 
+            human behavior, such as trust, urgency, fear, or curiosity. They are widely used because people are often the weakest link in 
+            security systems. The main purpose of social engineering is to steal confidential data, gain unauthorized access, spread malware, 
+            or commit fraud. These attacks can happen through emails, phone calls, text messages, or even in person. Organizations defend 
+            against them by creating awareness, training employees, verifying requests, and applying strong authentication methods.
+            </p>
+            <p style="color: white; font-weight: 600; margin-top: 1em;">Common goals include:</p>
+            <ul style="color: white; padding-left: 20px; line-height: 1.5;">
+                <li>Stealing usernames, passwords, and financial details</li>
+                <li>Installing malware or ransomware</li>
+                <li>Gaining unauthorized access to systems or buildings</li>
+                <li>Conducting identity theft or fraud</li>
+            </ul>
+            <p style="color: white; font-weight: 600; margin-top: 1em;">The types are:</p>
+            <div class="subtopic">
+                <button data-sub="phishing">Phishing</button>
+                <button data-sub="smishing">Smishing</button>
+                <button data-sub="baiting">Baiting</button>
+            </div>
+        </div>
+        
+        <!-- Malware Attacks Tab -->
+        <div class="tab-content" id="malware">
+            <h2>Malware Attacks</h2>
+            <p style="color: white; line-height: 1.5;">
+            A malware attack is a cyberattack where malicious software is used to disrupt operations, steal data, or gain unauthorized access 
+            to systems. Malware spreads through infected files, email attachments, malicious websites, or compromised devices like USB drives. 
+            Once inside a system, it can secretly monitor user activities, encrypt or delete data, slow down operations, or allow hackers to 
+            control the system. The main goals are usually financial gain, spying, data theft, or damaging systems. Malware attacks are 
+            dangerous because they can spread quickly and remain hidden. Protection requires updated antivirus software, regular security 
+            patches, safe browsing habits, and firewalls.
+            </p>
+            <p style="color: white; font-weight: 600; margin-top: 1em;">Common goals include:</p>
+            <ul style="color: white; padding-left: 20px; line-height: 1.5;">
+                <li>Data theft – Stealing usernames, passwords, financial data, or business information.</li>
+                <li>Disruption of services – Slowing down or crashing systems and networks.</li>
+                <li>Unauthorized access – Gaining control of systems for spying or future attacks.</li>
+                <li>Financial gain – Demanding ransom (ransomware) or committing fraud.</li>
+            </ul>
+            <p style="color: white; font-weight: 600; margin-top: 1em;">The types are:</p>
+            <div class="subtopic">
+                <button data-sub="virus">Virus</button>
+                <button data-sub="worm">Worm</button>
+                <button data-sub="adware">Adware</button>
+            </div>
+        </div>
+        
+        <!-- Password Attacks Tab -->
+        <div class="tab-content" id="password">
+            <h2>Password Attacks</h2>
+            <p style="color: white; line-height: 1.5;">
+            A password attack is a method where hackers attempt to steal or break passwords to gain access to systems, networks, or accounts. 
+            Since passwords are the most common form of authentication, they are often targeted by attackers. Once a password is compromised, 
+            hackers can steal personal data, misuse accounts, or take full control of devices and networks. Password attacks are carried out by 
+            guessing, stealing, or tricking users into revealing credentials. The main goals are unauthorized access, identity theft, financial 
+            fraud, or control over critical systems. Protection includes using strong and unique passwords, enabling multi-factor authentication, 
+            and changing passwords regularly.
+            </p>
+            <p style="color: white; font-weight: 600; margin-top: 1em;">Common goals include:</p>
+            <ul style="color: white; padding-left: 20px; line-height: 1.5;">
+                <li>Unauthorized access – Breaking into user accounts, email, or corporate systems.</li>
+                <li>Data theft – Stealing sensitive files, personal information, or business data.</li>
+                <li>Identity theft – Impersonating users for fraud or malicious activity.</li>
+                <li>Privilege escalation – Gaining admin rights to control entire systems.</li>
+            </ul>
+            <p style="color: white; font-weight: 600; margin-top: 1em;">The types are:</p>
+            <div class="subtopic">
+                <button data-sub="brute">Brute Force Attack</button>
+                <button data-sub="dict">Dictionary Attack</button>
+                <button data-sub="cred">Credential Stuffing</button>
+            </div>
+        </div>
+        
+        <!-- Identity & Privacy Attacks Tab -->
+        <div class="tab-content" id="identity">
+            <h2>Identity & Privacy Attacks</h2>
+            <p style="color: white; line-height: 1.5;">
+            An identity and privacy attack is a cyberattack where personal or confidential information is stolen and misused for fraudulent 
+            activities. This may include stealing names, addresses, bank details, social IDs, or login credentials to impersonate the victim 
+            or commit crimes. Such attacks can lead to financial fraud, blackmail, data misuse, or loss of reputation. Privacy attacks also 
+            involve unauthorized surveillance, data leaks, or online tracking without consent. These attacks are dangerous because they can 
+            affect both individuals and organizations by exposing critical data. Protection requires strong authentication, encryption, data 
+            security policies, and user awareness about sharing personal information online.
+            </p>
+            <p style="color: white; font-weight: 600; margin-top: 1em;">Common goals include:</p>
+            <ul style="color: white; padding-left: 20px; line-height: 1.5;">
+                <li>Identity theft – Using stolen personal data to impersonate victims.</li>
+                <li>Financial fraud – Accessing bank accounts, credit cards, or online wallets.</li>
+                <li>Unauthorized access – Breaking into emails, social media, or corporate accounts.</li>
+                <li>Blackmail or extortion – Misusing sensitive private information.</li>
+            </ul>
+            <p style="color: white; font-weight: 600; margin-top: 1em;">The types are:</p>
+            <div class="subtopic">
+                <button data-sub="morph">Image Morphing</button>
+                <button data-sub="deepfake">Deepfake</button>
+                <button data-sub="theft">Identity Theft</button>
+            </div>
+        </div>
+        <div class="tab-content" id="review">
+            <iframe src="review.html" style="width:100%; height:100vh; border:none;"></iframe>
+        </div>
+
+    </main>
+    
+    <!-- Modal for subtopics -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2 id="modal-title"></h2>
+            <p id="modal-content"></p>
+            <a href="example.html" class="real-life-btn" id="real-life-btn">Real Life Example</a> <!-- Opens in same page -->
+            <button class="close-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(btn.dataset.tab).classList.add('active');
+                });
+            });
+            
+            // Subtopic content data (dummy educational content)
+            const subContent = {
+                phishing: "Phishing is a type of online scam where criminals impersonate legitimate organizations via email, text message, advertisement or other means in order to steal sensitive information. This is usually done by including a link that will appear to take you to the company’s website to fill in your information – but the website is a clever fake and the information you provide goes straight to the crooks behind the scam",
+                smishing: "Smishing is a social engineering attack that uses fake mobile text messages to trick people into downloading malware, sharing sensitive information or sending money to cybercriminals. The term “smishing” is a combination of “SMS”—or “short message service,” the technology behind text messages—and “phishing.",
+                baiting: "Baiting is a form of social engineering that compels users to install malware or extract sensitive information by luring users in with an offer of free software, gifts or even just cash. Baiting uses either a natural curiosity or greed, and a disdain for almost everything like credit card debt or car payments, ultimately capitalizing on the human element being the most challenging barrier we face in ad hoc cyber defense attempts.",
+                virus: "A computer virus is a type of malware that attaches itself to other programs, self-replicates, and spreads from one computer to another. When a virus infects a computer, it makes copies of itself and attaches to other files or documents. It then modifies those files and continues to spread.",
+                worm: "A worm is not a virus, although like a virus, it can severely disrupt IT operations and cause data loss. A worm is actually much more serious than a virus because once it infects a vulnerable machine, it can “self-replicate” and spread automatically across multiple devices.",
+                adware: "Adware is a type of unwanted software that automatically displays or downloads advertisements on your device.It usually appears as pop-ups, banners, or unwanted redirects while you browse.At first, it may look harmless because it only shows ads, but some adware can also collect your personal data and slow down your system.",
+                brute: "A Brute Force Attack is a method where attackers try every possible password or key combination until they find the correct one. It’s a simple but time-consuming attack, especially for long and complex passwords. Automated tools speed up the process, allowing thousands or millions of attempts quickly. Short or simple passwords can be cracked almost instantly, while strong passwords with letters, numbers, and symbols are much harder to break.",
+                dict: "A Dictionary Attack is a method where attackers guess passwords using a list of common words, phrases, or passwords instead of trying all possible combinations. It’s faster than brute force because it targets passwords people actually use, like “123456” or “password.” Attackers go through this “dictionary” word by word until they succeed.",
+                cred: "Credential Stuffing occurs when attackers use username and password combinations stolen from other sites to try logging into different accounts. Since many people reuse passwords, attackers can gain access easily if the same password works elsewhere.To stay safe, use unique passwords for each account and enable multi-factor authentication, so leaked passwords alone won’t grant access.",
+                morph: "Image Morphing is a process of blending two or more images, especially faces, to create a new image that looks real but is fake. It is used by attackers to create forged identities or fake documents by mixing features of different people’s faces. This technique can trick facial recognition systems and lead to identity theft or privacy breaches.",
+                deepfake: "Deepfake is a technique where artificial intelligence (AI) is used to create fake videos or audio recordings that look or sound real. By manipulating or replacing someone’s face, voice, or actions, attackers can spread false information, impersonate others, or damage reputations. These fake files are hard to detect and can be used to trick people or systems.",
+                theft: "Identity Theft is when someone steals another person’s personal information like name, address, bank details, or passwords—to commit fraud. The stolen data is used to open fake accounts, make purchases, or carry out other criminal activities while pretending to be the real person."
+            };
+            
+            // Mapping subtopics to example pages
+            const exampleLinks = {
+                phishing: 'phishing.html',
+                smishing: 'smishing.html',
+                baiting: 'baiting.html',
+                virus: 'virus.html',
+                worm: 'worm.html',
+                adware: 'adware.html',
+                brute: 'brute.html',
+                dict: 'dictionary.html',
+                cred: 'credential-stuffing.html',
+                morph: 'image-morphing.html',
+                deepfake: 'deepfake.html',
+                theft: 'identity-theft.html'
+            };
+            
+            // Handle subtopic clicks: Show modal
+            document.querySelectorAll('[data-sub]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const sub = btn.dataset.sub;
+                    const title = btn.textContent.trim();
+                    document.getElementById('modal-title').textContent = title;
+                    document.getElementById('modal-content').textContent = subContent[sub];
+                    // Set the real-life example link dynamically
+                    const realLifeBtn = document.getElementById('real-life-btn');
+                    realLifeBtn.href = exampleLinks[sub] || 'example.html'; // fallback link
+                    document.getElementById('modal').classList.add('active');
+                    document.querySelector('main').style.display = 'none'; // Hide main content
+                });
+            });
+        });
+        
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.querySelector('main').style.display = 'flex'; // Restore main content
+        }
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+
+            // Hide all tab contents
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            // Remove "active" from all tab buttons
+            tablinks = document.getElementsByClassName("tab-link");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show the current tab
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+    </script>
+</body>
+</html>

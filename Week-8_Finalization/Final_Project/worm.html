@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Worm Propagation Simulation</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+    color: #fff;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(17, 17, 17, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stats-board {
+    display: flex;
+    gap: 25px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .stats-board div {
+    text-align: center;
+    min-width: 80px;
+  }
+  .stats-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    opacity: 0.8;
+  }
+  .stats-value {
+    font-size: 24px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+  }
+  .infected .stats-value {
+    color: #f87171;
+    text-shadow: 0 0 15px rgba(248, 113, 113, 0.7);
+    animation: pulse 1.5s infinite;
+  }
+  .spread .stats-value {
+    color: #f59e0b;
+    text-shadow: 0 0 15px rgba(245, 158, 11, 0.7);
+    animation: pulse 1.5s infinite;
+  }
+  main {
+    padding: 100px 25px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .welcome-section {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .welcome-section h2 {
+    font-size: 28px;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .welcome-section p {
+    font-size: 16px;
+    color: #cccccc;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .simulation-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 30px;
+  }
+  .network-visualization, .email-visualization {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    min-height: 400px;
+  }
+  .network-visualization h3, .email-visualization h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #ccc;
+  }
+  .network-map {
+    height: 300px;
+    position: relative;
+    border: 2px solid #333;
+    border-radius: 12px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #111 0%, #222 100%);
+  }
+  .email-inbox {
+    height: 300px;
+    border: 2px solid #333;
+    border-radius: 12px;
+    overflow-y: auto;
+    background: #1a1a1a;
+  }
+  .computer-node {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: #2a2a2a;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #10b981;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.5);
+    transition: all 1.2s ease;
+    cursor: default;
+  }
+  .computer-node.infected {
+    border-color: #ef4444;
+    box-shadow: 0 0 20px 6px rgba(239, 68, 68, 0.9);
+    animation: infectedPulse 2.5s infinite;
+    transform-style: preserve-3d;
+    transform: perspective(600px) rotateY(10deg) scale(1.15);
+  }
+  .network-connection {
+    position: absolute;
+    background: #4ade80;
+    height: 2px;
+    transform-origin: 0 0;
+    opacity: 0.6;
+  }
+  .email-message {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-family: monospace;
+  }
+  .email-message:hover {
+    background: #2a2a2a;
+  }
+  .email-message.infected {
+    border-left: 4px solid #ef4444;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+  }
+  .email-subject {
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  .email-from {
+    font-size: 12px;
+    color: #888;
+  }
+  .infection-animation {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.85) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: infectSpread 2s ease-out;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .worm-particle {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: #ef4444;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10;
+    box-shadow: 0 0 12px 5px rgba(239, 68, 68, 0.9);
+  }
+  .controls {
+    text-align: center;
+    margin: 30px 0;
+  }
+  .control-btn {
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .control-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+  }
+  .explanation-section {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    margin-top: 30px;
+  }
+  .explanation-section h3 {
+    color: #f59e0b;
+    margin-bottom: 15px;
+    font-size: 22px;
+  }
+  .explanation-content {
+    line-height: 1.6;
+    color: #ccc;
+  }
+  .explanation-content ul {
+    margin: 15px 0;
+    padding-left: 20px;
+  }
+  .explanation-content li {
+    margin: 8px 0;
+  }
+  @keyframes infectedPulse {
+    0%, 100% { 
+      box-shadow: 0 0 20px 6px rgba(239, 68, 68, 0.9);
+      transform: perspective(600px) rotateY(10deg) scale(1.15);
+    }
+    50% { 
+      box-shadow: 0 0 30px 10px rgba(239, 68, 68, 1);
+      transform: perspective(600px) rotateY(-10deg) scale(1.2);
+    }
+  }
+  @keyframes infectSpread {
+    0% { 
+      transform: scale(0);
+      opacity: 1;
+    }
+    100% { 
+      transform: scale(1.7);
+      opacity: 0;
+    }
+  }
+  @keyframes wormMove {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    20% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--tx), var(--ty)) scale(1);
+    }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🔄</div>
+    <h1>Worm Propagation Simulation</h1>
+  </div>
+  <div class="stats-board">
+    <div class="infected">
+      <div class="stats-label">Infected</div>
+      <div class="stats-value" id="infected-count">0</div>
+    </div>
+    <div class="spread">
+      <div class="stats-label">Emails Sent</div>
+      <div class="stats-value" id="emails-sent">0</div>
+    </div>
+    <div class="spread">
+      <div class="stats-label">Network Spread</div>
+      <div class="stats-value" id="network-spread">0</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="welcome-section">
+    <h2>ILOVEYOU Worm Simulation</h2>
+    <p>Watch how the infamous ILOVEYOU worm spread automatically across networks in 2000, infecting millions of computers worldwide through email propagation and network sharing.</p>
+  </div>
+  
+  <div class="simulation-area">
+    <div class="network-visualization">
+      <h3>Network Infection Map</h3>
+      <div class="network-map" id="network-map"></div>
+    </div>
+    
+    <div class="email-visualization">
+      <h3>Email Propagation</h3>
+      <div class="email-inbox" id="email-inbox"></div>
+    </div>
+  </div>
+  
+  <div class="controls">
+    <button class="control-btn" onclick="startWormSimulation()">🚀 Start Worm Simulation</button>
+    <button class="control-btn" onclick="resetSimulation()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); margin-left: 15px;">🔄 Reset Simulation</button>
+  </div>
+  
+  <div class="explanation-section">
+    <h3>How the ILOVEYOU Worm Worked</h3>
+    <div class="explanation-content">
+      <p><strong>The ILOVEYOU worm</strong> (also known as Love Bug or Love Letter) was one of the most destructive computer worms in history, causing an estimated $10 billion in damages in 2000.</p>
+      
+      <p><strong>Infection Mechanism:</strong></p>
+      <ul>
+        <li>📧 Sent via email with subject "ILOVEYOU" and attachment "LOVE-LETTER-FOR-YOU.txt.vbs"</li>
+        <li>⚡ When opened, executed VBScript that replicated itself</li>
+        <li>📬 Sent copies to ALL contacts in victim's email address book</li>
+        <li>💻 Copied itself to shared network drives automatically</li>
+        <li>🔄 No user intervention needed beyond opening the initial email</li>
+      </ul>
+      
+      <p><strong>Automatic Propagation:</strong></p>
+      <ul>
+        <li>🌐 Spread across networks without human interaction</li>
+        <li>🚀 Exponential growth: Each infection created dozens of new infections</li>
+        <li>⏰ Rapid spread: Infected 10% of internet-connected computers in 10 days</li>
+        <li>💔 Damaged files by overwriting them with copies of the worm</li>
+      </ul>
+      
+      <p><strong>Impact:</strong> Over 50 million infections worldwide, shutting down government and corporate systems, including the Pentagon, CIA, and British Parliament.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+  const computers = [];
+const emailContacts = [
+  'john@company.com', 'sarah@company.com', 'mike@company.com',
+  'lisa@company.com', 'david@company.com', 'emma@company.com',
+  'alex@company.com', 'marcia@company.com', 'robert@company.com'
+];
+
+const networkMap = document.getElementById('network-map');
+const emailInbox = document.getElementById('email-inbox');
+const infectedCountEl = document.getElementById('infected-count');
+const emailsSentEl = document.getElementById('emails-sent');
+const networkSpreadEl = document.getElementById('network-spread');
+
+let infectedComputers = 0;
+let totalEmailsSent = 0;
+let networkInfections = 0;
+let simulationActive = false;
+
+function initializeNetwork() {
+  networkMap.innerHTML = '';
+  computers.length = 0;
+  const cols = 5;
+  const rows = 3;
+  const spacingX = networkMap.offsetWidth / (cols + 1);
+  const spacingY = networkMap.offsetHeight / (rows + 1);
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const computer = {
+        id: row * cols + col + 1,
+        x: (col + 1) * spacingX,
+        y: (row + 1) * spacingY,
+        infected: false,
+        element: null
+      };
+      computers.push(computer);
+      const computerEl = document.createElement('div');
+      computerEl.className = 'computer-node';
+      computerEl.innerHTML = '💻';
+      computerEl.style.left = (computer.x - 25) + 'px';
+      computerEl.style.top = (computer.y - 25) + 'px';
+      computerEl.title = `Computer ${computer.id}`;
+      networkMap.appendChild(computerEl);
+      computer.element = computerEl;
+      if (col > 0) createConnection(computer, computers[row * cols + col - 1]);
+      if (row > 0) createConnection(computer, computers[(row - 1) * cols + col]);
+    }
+  }
+}
+
+function createConnection(comp1, comp2) {
+  const dx = comp2.x - comp1.x;
+  const dy = comp2.y - comp1.y;
+  const length = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  const connection = document.createElement('div');
+  connection.className = 'network-connection';
+  connection.style.width = length + 'px';
+  connection.style.left = comp1.x + 'px';
+  connection.style.top = comp1.y + 'px';
+  connection.style.transform = `rotate(${angle}deg)`;
+  networkMap.appendChild(connection);
+}
+
+function initializeEmailInbox() {
+  emailInbox.innerHTML = '';
+  addEmailMessage('Welcome to your inbox', 'system@company.com', false);
+}
+
+function addEmailMessage(subject, from, isInfected) {
+  const email = document.createElement('div');
+  email.className = `email-message ${isInfected ? 'infected' : ''}`;
+  email.innerHTML = `
+    <div class="email-subject">${subject}</div>
+    <div class="email-from">From: ${from}</div>
+  `;
+  if (isInfected) {
+    email.addEventListener('click', () => {
+      if (!simulationActive) {
+        infectComputer(computers[0]);
+      }
+    });
+  }
+  emailInbox.appendChild(email);
+  emailInbox.scrollTop = emailInbox.scrollHeight;
+}
+
+function infectComputer(computer) {
+  if (computer.infected) return;
+  computer.infected = true;
+  computer.element.classList.add('infected');
+  infectedComputers++;
+  infectedCountEl.textContent = infectedComputers;
+
+  const infectionAnim = document.createElement('div');
+  infectionAnim.className = 'infection-animation';
+  infectionAnim.style.left = (computer.x - 70) + 'px';
+  infectionAnim.style.top = (computer.y - 70) + 'px';
+  networkMap.appendChild(infectionAnim);
+
+  setTimeout(() => infectionAnim.remove(), 2000);
+
+  if (simulationActive) {
+    propagateWorm(computer);
+  }
+}
+
+function propagateWorm(computer) {
+  // Send emails to contacts with delay
+  emailContacts.forEach((contact, i) => {
+    setTimeout(() => {
+      addEmailMessage('ILOVEYOU', 'friend@domain.com', true);
+      totalEmailsSent++;
+      emailsSentEl.textContent = totalEmailsSent;
+    }, 1500 + i * 500);
+  });
+
+  // Infect nearby network computers with delay and animation
+  computers.forEach(otherComputer => {
+    if (!otherComputer.infected && computer.id !== otherComputer.id) {
+      const distance = Math.sqrt(
+        Math.pow(otherComputer.x - computer.x, 2) +
+        Math.pow(otherComputer.y - computer.y, 2)
+      );
+      if (distance < 150 && Math.random() < 0.7) {
+        setTimeout(() => {
+          createWormParticle(computer, otherComputer);
+          setTimeout(() => {
+            infectComputer(otherComputer);
+            networkInfections++;
+            networkSpreadEl.textContent = networkInfections;
+          }, 1500);
+        }, Math.random() * 4000);
+      }
+    }
+  });
+}
+
+function createWormParticle(fromComputer, toComputer) {
+  const particle = document.createElement('div');
+  particle.className = 'worm-particle';
+  particle.style.left = fromComputer.x + 'px';
+  particle.style.top = fromComputer.y + 'px';
+  particle.style.setProperty('--tx', (toComputer.x - fromComputer.x) + 'px');
+  particle.style.setProperty('--ty', (toComputer.y - fromComputer.y) + 'px');
+  particle.style.animation = `wormMove 2s linear forwards`;
+  networkMap.appendChild(particle);
+  setTimeout(() => particle.remove(), 2000);
+}
+
+function startWormSimulation() {
+  if (simulationActive) return;
+  simulationActive = true;
+  addEmailMessage('ILOVEYOU', 'unknown@sender.com', true);
+  setTimeout(() => infectComputer(computers[0]), 1500);
+}
+
+function resetSimulation() {
+  simulationActive = false;
+  infectedComputers = 0;
+  totalEmailsSent = 0;
+  networkInfections = 0;
+  infectedCountEl.textContent = '0';
+  emailsSentEl.textContent = '0';
+  networkSpreadEl.textContent = '0';
+  initializeNetwork();
+  initializeEmailInbox();
+}
+
+window.addEventListener('resize', () => {
+  // Reinitialize network on resize for correct positioning
+  if (!simulationActive) initializeNetwork();
+});
+
+initializeNetwork();
+initializeEmailInbox();
+</script>
+
+</body>
+</html>

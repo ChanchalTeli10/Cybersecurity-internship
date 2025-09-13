@@ -1,0 +1,539 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smishing Awareness Training</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .message-bubble {
+            max-width: 85%;
+            margin: 8px 0;
+            border-radius: 18px;
+            padding: 12px 16px;
+            line-height: 1.4;
+        }
+        
+        .received {
+            background: #2a2a2a;
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+        }
+        
+        .sent {
+            background: #007AFF;
+            border-bottom-right-radius: 4px;
+            align-self: flex-end;
+        }
+        
+        .scrolling-container {
+            height: calc(100vh - 200px);
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .scrolling-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .notification-badge {
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .score-animation {
+            animation: scorePop 0.5s ease-in-out;
+        }
+        
+        @keyframes scorePop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .highlight-malicious {
+            color: #ff6b6b;
+            font-weight: 600;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        
+        .highlight-malicious:hover {
+            color: #ff4757;
+        }
+        
+        .completed-message {
+            opacity: 0.7;
+            filter: grayscale(0.3);
+        }
+        
+        .completed-check {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .disabled-message {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-black">
+    <!-- Scoreboard Header -->
+    <header class="bg-black border-b border-gray-800 p-4 fixed top-0 w-full z-20">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+                <h1 class="text-white text-xl font-semibold">Smishing Training</h1>
+            </div>
+            
+            <!-- Score Counter -->
+            <div class="flex items-center space-x-6 bg-gray-900 px-4 py-2 rounded-lg">
+                <div class="text-center">
+                    <div class="text-green-400 text-sm font-medium">Correct</div>
+                    <div id="correct-score" class="text-2xl font-bold text-green-400">0</div>
+                </div>
+                <div class="h-8 w-px bg-gray-700"></div>
+                <div class="text-center">
+                    <div class="text-red-400 text-sm font-medium">Wrong</div>
+                    <div id="wrong-score" class="text-2xl font-bold text-red-400">0</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Current Scenario Indicator -->
+    <div id="scenario-indicator" class="fixed top-20 left-0 right-0 bg-gradient-to-r from-purple-600 to-blue-600 p-2 text-center text-white font-medium text-sm z-10">
+        Identify if this message is Real or Fake
+    </div>
+
+    <!-- Message List -->
+    <main class="pt-28 pb-28">
+        <div class="space-y-1 px-4">
+            <!-- Bank Message -->
+            <div id="bank-scam-item" class="p-4 border-b border-gray-800 hover:bg-gray-900 cursor-pointer transition-colors relative" onclick="showConversation('bank-scam')">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-semibold">CB</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="text-white font-semibold">Chase Bank</span>
+                            </div>
+                            <p class="text-gray-400 text-sm">Urgent: Your account has been locked...</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-gray-500 text-xs">2:30 PM</span>
+                        <div class="notification-badge mt-1 ml-auto">1</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivery Message -->
+            <div id="delivery-scam-item" class="p-4 border-b border-gray-800 hover:bg-gray-900 cursor-pointer transition-colors relative" onclick="showConversation('delivery-scam')">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-semibold">FD</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="text-white font-semibold">FedEx Delivery</span>
+                            </div>
+                            <p class="text-gray-400 text-sm">Your package delivery needs confirmation...</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-gray-500 text-xs">Yesterday</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amazon Message -->
+            <div id="legitimate-item" class="p-4 border-b border-gray-800 hover:bg-gray-900 cursor-pointer transition-colors relative" onclick="showConversation('legitimate')">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-semibold">AM</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="text-white font-semibold">Amazon</span>
+                            </div>
+                            <p class="text-gray-400 text-sm">Your order #12345 has been shipped!</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-gray-500 text-xs">10:15 AM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prize Message -->
+            <div id="prize-scam-item" class="p-4 border-b border-gray-800 hover:bg-gray-900 cursor-pointer transition-colors relative" onclick="showConversation('prize-scam')">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-red-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-semibold">PP</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="text-white font-semibold">Prize Promotions</span>
+                            </div>
+                            <p class="text-gray-400 text-sm">CONGRATULATIONS! You won $10,000...</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-gray-500 text-xs">11:45 AM</span>
+                        <div class="notification-badge mt-1 ml-auto">1</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Message -->
+            <div id="social-media-item" class="p-4 border-b border-gray-800 hover:bg-gray-900 cursor-pointer transition-colors relative" onclick="showConversation('social-media')">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-red-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-semibold">FB</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <span class="text-white font-semibold">Facebook Security</span>
+                            </div>
+                            <p class="text-gray-400 text-sm">Suspicious login attempt detected...</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-gray-500 text-xs">9:22 AM</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Conversation View (Hidden Initially) -->
+    <div id="conversation-view" class="fixed inset-0 bg-black z-30 hidden">
+        <div class="relative h-full flex flex-col">
+            <!-- Conversation Header -->
+            <div class="bg-black border-b border-gray-800 p-4">
+                <div class="flex items-center space-x-3">
+                    <button onclick="hideConversation()" class="text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="conversation-sender" class="text-white font-semibold text-lg"></div>
+                </div>
+            </div>
+
+            <!-- Messages Container -->
+            <div id="messages-container" class="flex-1 p-4 overflow-y-auto scrolling-container">
+                <!-- Messages will be dynamically inserted here -->
+            </div>
+
+            <!-- Decision Buttons -->
+            <div id="decision-buttons" class="p-4 border-t border-gray-800 bg-black">
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="makeDecision('real')" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                        ✅ Real Message
+                    </button>
+                    <button onclick="makeDecision('fake')" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                        ❌ Fake Message
+                    </button>
+                </div>
+            </div>
+
+            <!-- Link Warning Modal -->
+            <div id="link-warning-modal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-40 hidden">
+                <div class="bg-red-900 p-6 rounded-lg mx-4 max-w-md w-full border-2 border-red-600">
+                    <div class="text-6xl mb-4 text-center">⚠️</div>
+                    <h3 class="text-xl font-semibold mb-4 text-center text-white">WARNING: Potential Security Risk!</h3>
+                    <p class="text-red-200 mb-4 text-center">Clicking suspicious links could:</p>
+                    <ul class="text-red-200 text-sm mb-6 space-y-2">
+                        <li>• Install malware on your device</li>
+                        <li>• Steal your personal information</li>
+                        <li>• Compromise your accounts</li>
+                        <li>• Lead to financial loss</li>
+                    </ul>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="closeLinkWarning()" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 rounded-lg transition-colors">
+                            Go Back
+                        </button>
+                        <button onclick="closeLinkWarning()" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition-colors">
+                            I Understand
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Modal -->
+            <div id="feedback-modal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-40 hidden">
+                <div class="bg-gray-900 p-6 rounded-lg mx-4 max-w-md w-full">
+                    <div id="feedback-icon" class="text-4xl mb-4 text-center"></div>
+                    <h3 id="feedback-title" class="text-xl font-semibold mb-2 text-center"></h3>
+                    <p id="feedback-message" class="text-gray-300 mb-6 text-center"></p>
+                    <div id="feedback-tips" class="text-sm text-gray-400 mb-6"></div>
+                    <button onclick="closeFeedback()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors">
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <footer class="fixed bottom-0 w-full bg-black border-t border-gray-800 p-4 z-10">
+        <div class="flex justify-around">
+            <div class="text-center">
+                <svg class="w-6 h-6 text-blue-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <span class="text-blue-400 text-xs block mt-1">Messages</span>
+            </div>
+            <div class="text-center">
+                <svg class="w-6 h-6 text-gray-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                <span class="text-gray-500 text-xs block mt-1">Stats</span>
+            </div>
+            <div class="text-center">
+                <svg class="w-6 h-6 text-gray-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span class="text-gray-500 text-xs block mt-1">Profile</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let currentScenario = null;
+        let scores = { correct: 0, wrong: 0 };
+        let completedScenarios = new Set();
+
+        const scenarios = {
+            'bank-scam': {
+                sender: 'Chase Bank',
+                isFake: true,
+                messages: [
+                    {
+                        type: 'received',
+                        text: 'URGENT: Your Chase account #XXXX-1234 has been locked due to suspicious activity. Click here to verify your identity: http://chase-security-verify.com/account-recovery',
+                        time: '2:30 PM'
+                    }
+                ],
+                explanation: 'This is a FAKE message! 🚨\n• Banks never send security links via SMS\n• The URL is suspicious (not chase.com)\n• Urgency creates pressure to act quickly\n• Always contact your bank directly using official numbers'
+            },
+            'delivery-scam': {
+                sender: 'FedEx Delivery',
+                isFake: true,
+                messages: [
+                    {
+                        type: 'received',
+                        text: 'FedEx: Your package delivery requires confirmation. Please update your delivery preferences at: fedex-delivery-update.info/confirm-address',
+                        time: '10:15 AM'
+                    }
+                ],
+                explanation: 'This is a FAKE message! ⚠️\n• FedEx uses official fedex.com domains only\n• The message requests personal information\n• Suspicious link leads to phishing site\n• Real delivery notifications include tracking numbers'
+            },
+            'legitimate': {
+                sender: 'Amazon',
+                isFake: false,
+                messages: [
+                    {
+                        type: 'received',
+                        text: 'Amazon: Your order #123-4567890-1234567 has shipped! Expected delivery: Tomorrow by 8pm. Track your package: amazon.com/orders',
+                        time: '9:45 AM'
+                    },
+                    {
+                        type: 'sent',
+                        text: 'Thanks for the update!',
+                        time: '9:46 AM'
+                    }
+                ],
+                explanation: 'This is a REAL message! ✅\n• Comes from verified Amazon number\n• Includes specific order details\n• Uses official amazon.com domain\n• No urgent action required'
+            },
+            'prize-scam': {
+                sender: 'Prize Promotions',
+                isFake: true,
+                messages: [
+                    {
+                        type: 'received',
+                        text: 'CONGRATULATIONS! You won $10,000 in our monthly draw! Claim your prize now: prize-claim-center.com/win?id=12345',
+                        time: '11:30 AM'
+                    }
+                ],
+                explanation: 'This is a FAKE message! 💰🚫\n• Legitimate prizes don\'t ask for money upfront\n• Suspicious URL and lack of company name\n• Creates false excitement to lower guard\n• Real winners are notified by registered mail'
+            },
+            'social-media': {
+                sender: 'Facebook Security',
+                isFake: true,
+                messages: [
+                    {
+                        type: 'received',
+                        text: 'Facebook Security Alert: Unusual login attempt from new device. Secure your account now: facebook-security-check.xyz/verify',
+                        time: '9:22 AM'
+                    }
+                ],
+                explanation: 'This is a FAKE message! 🔐\n• Facebook uses facebook.com domains only\n• Real security alerts come from verified numbers\n• The link leads to a phishing site\n• Always check login activity in the official app'
+            }
+        };
+
+        function showConversation(scenarioId) {
+            if (completedScenarios.has(scenarioId)) return;
+            
+            currentScenario = scenarioId;
+            const scenario = scenarios[scenarioId];
+            document.getElementById('conversation-sender').textContent = scenario.sender;
+            
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+            
+            scenario.messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message-bubble ${msg.type} fade-in`;
+                
+                // Make malicious links clickable with warning
+                let messageText = msg.text;
+                if (scenario.isFake) {
+                    messageText = messageText.replace(/(http[^\s]+)/g, '<span class="highlight-malicious" onclick="showLinkWarning()">$1</span>');
+                } else {
+                    // For real messages, make links look normal but not clickable
+                    messageText = messageText.replace(/(http[^\s]+)/g, '<span style="color: #007AFF;">$1</span>');
+                }
+                
+                messageDiv.innerHTML = `
+                    <div class="text-white">${messageText}</div>
+                    <div class="text-xs text-gray-500 mt-1 text-right">${msg.time}</div>
+                `;
+                container.appendChild(messageDiv);
+            });
+            
+            container.scrollTop = container.scrollHeight;
+            document.getElementById('conversation-view').classList.remove('hidden');
+            document.getElementById('scenario-indicator').textContent = `Is this message from ${scenario.sender} Real or Fake?`;
+        }
+
+        function hideConversation() {
+            document.getElementById('conversation-view').classList.add('hidden');
+            currentScenario = null;
+        }
+
+        function showLinkWarning() {
+            document.getElementById('link-warning-modal').classList.remove('hidden');
+        }
+
+        function closeLinkWarning() {
+            document.getElementById('link-warning-modal').classList.add('hidden');
+        }
+
+        function makeDecision(decision) {
+            if (!currentScenario || completedScenarios.has(currentScenario)) return;
+            
+            const scenario = scenarios[currentScenario];
+            const isCorrect = (decision === 'real' && !scenario.isFake) || (decision === 'fake' && scenario.isFake);
+            
+            if (isCorrect) {
+                scores.correct++;
+                document.getElementById('correct-score').textContent = scores.correct;
+                document.getElementById('correct-score').classList.add('score-animation');
+                setTimeout(() => document.getElementById('correct-score').classList.remove('score-animation'), 500);
+            } else {
+                scores.wrong++;
+                document.getElementById('wrong-score').textContent = scores.wrong;
+                document.getElementById('wrong-score').classList.add('score-animation');
+                setTimeout(() => document.getElementById('wrong-score').classList.remove('score-animation'), 500);
+            }
+            
+            // Mark scenario as completed
+            completedScenarios.add(currentScenario);
+            const item = document.getElementById(`${currentScenario}-item`);
+            if (item) {
+                item.classList.add('disabled-message', 'completed-message');
+                const checkMark = document.createElement('div');
+                checkMark.className = 'completed-check';
+                checkMark.innerHTML = '✓';
+                item.appendChild(checkMark);
+            }
+            
+            showFeedback(isCorrect, scenario.explanation);
+        }
+
+        function showFeedback(isCorrect, explanation) {
+            const modal = document.getElementById('feedback-modal');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const message = document.getElementById('feedback-message');
+            const tips = document.getElementById('feedback-tips');
+            
+            if (isCorrect) {
+                icon.textContent = '🎉';
+                title.textContent = 'Correct!';
+                title.className = 'text-xl font-semibold mb-2 text-center text-green-400';
+                message.textContent = 'Great job identifying this message correctly!';
+            } else {
+                icon.textContent = '💡';
+                title.textContent = 'Incorrect';
+                title.className = 'text-xl font-semibold mb-2 text-center text-red-400';
+                message.textContent = 'Let\'s review what to look for:';
+            }
+            
+            tips.innerHTML = `<div class="bg-gray-800 p-4 rounded-lg"><strong>Learning Point:</strong><br>${explanation}</div>`;
+            modal.classList.remove('hidden');
+        }
+
+        function closeFeedback() {
+            document.getElementById('feedback-modal').classList.add('hidden');
+            hideConversation();
+        }
+
+        // Initialize scores
+        document.getElementById('correct-score').textContent = scores.correct;
+        document.getElementById('wrong-score').textContent = scores.wrong;
+    </script>
+</body>
+</html>
+```

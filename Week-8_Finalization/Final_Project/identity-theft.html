@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Identity Theft</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+        .page {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+        .page.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .option-btn {
+            background: linear-gradient(135deg, #ff4444, #cc3333);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 8px rgba(255, 68, 68, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .option-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(255, 68, 68, 0.5);
+        }
+        .next-btn {
+            background: #44ff44;
+            color: black;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background 0.4s, transform 0.2s;
+            margin-top: 10px;
+        }
+        .next-btn:hover {
+            background: #22cc22;
+            transform: scale(1.05);
+        }
+        .fade-in {
+            animation: fadeIn 1.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .slide-left {
+            animation: slideLeft 1s ease;
+        }
+        @keyframes slideLeft {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        .bounce {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .rotate {
+            animation: rotate 3s linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .pulse {
+            animation: pulse 1s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .form-input {
+            background: #333;
+            border: 1px solid #555;
+            color: #e0e0e0;
+            padding: 10px;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus {
+            border-color: #ff4444;
+            outline: none;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.5s;
+        }
+        .modal-content {
+            background: #555;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            animation: bounce 0.5s;
+        }
+        .tooltip {
+            position: relative;
+            cursor: pointer;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* Smaller images for all sections */
+        #intro img,
+        #how-it-works img,
+        #demoImg {
+            max-width: 450px;
+            width: 85%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        #where-examples img {
+            max-width: 300px;
+            width: 80%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-5xl w-full bg-gray-800 rounded-lg shadow-2xl p-8 fade-in text-center">
+
+        <section id="main-menu" class="page active">
+            <h1 class="text-6xl font-extrabold text-red-500 mb-8 bounce" style="line-height:1.2;">Identity Theft</h1>
+            <p class="text-lg text-gray-300 mb-8 max-w-3xl mx-auto">Select an option to explore. Each choice reveals a section with animations and popups for a better experience.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <button class="option-btn" onclick="showPage('intro')" data-page="intro">
+                    <span class="pulse">Introduction</span>
+                    <div class="tooltip">
+                        <span class="tooltiptext">Learn the basics of identity theft and its impacts.</span>
+                    </div>
+                </button>
+                <button class="option-btn" onclick="showPage('how-it-works')" data-page="how-it-works">
+                    <span class="pulse">How It Works</span>
+                    <div class="tooltip">
+                        <span class="tooltiptext">Discover the methods attackers use to steal your data.</span>
+                    </div>
+                </button>
+                <button class="option-btn" onclick="showPage('where-examples')" data-page="where-examples">
+                    <span class="pulse">Examples</span>
+                    <div class="tooltip">
+                        <span class="tooltiptext">See where it happens and real-life cases.</span>
+                    </div>
+                </button>
+                <button class="option-btn" onclick="showPage('demo')" data-page="demo">
+                    <span class="pulse">Demo Simulation</span>
+                    <div class="tooltip">
+                        <span class="tooltiptext">Experience a simulated identity theft scenario.</span>
+                    </div>
+                </button>
+            </div>
+            <div class="modal" id="option-modal">
+                <div class="modal-content">
+                    <h3 class="text-xl font-bold text-white">Option Selected!</h3>
+                    <p class="text-gray-300" id="modal-text">You're heading to the section.</p>
+                    <button class="next-btn" onclick="confirmSelection()">Proceed</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="intro" class="page">
+            <h2 class="text-3xl font-semibold text-white mb-6 slide-left">Introduction</h2>
+            <p class="text-gray-300 mb-6 slide-left">Identity theft occurs when someone steals your personal information, such as your name, Social Security number, or credit card details, to commit fraud or other crimes. It's a growing cyber threat that can lead to financial loss, ruined credit, and emotional distress.</p>
+            <div class="flex justify-center">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/450aa28a-770c-4859-9398-ad10bea056e5.png" alt="Illustrative scene of a shadowy figure stealing digital data from a glowing computer screen in a dark cyber environment, with abstract icons like a lock being cracked and credit cards floating away, in a minimalist hacker-style design" class="fade-in" />
+            </div>
+            <button class="next-btn" onclick="showPage('main-menu')">Back to Menu</button>
+        </section>
+
+        <section id="how-it-works" class="page">
+            <h2 class="text-3xl font-semibold text-white mb-6 slide-left">How It Works</h2>
+            <p class="text-gray-300 mb-6 slide-left">Identity theft typically starts with methods like phishing (trick emails or websites), malware (viruses), data breaches, dumpster diving, or shoulder surfing. Once data is obtained, criminals use it for fraud.</p>
+            <div class="flex justify-center">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/418b5fcd-d00e-45c9-959b-3156f54faa20.png" alt="Step-by-step flowchart of identity theft: 1. Open suspicious email with phishing link, 2. User clicks link and enters details, 3. Malware installs and steals data, 4. Data is sold on dark web to fraudsters, 5. Fraudsters use data to commit crimes like opening fake bank accounts, in a dark-themed digital illustration" class="fade-in" />
+            </div>
+            <button class="next-btn" onclick="showPage('main-menu')">Back to Menu</button>
+        </section>
+
+        <section id="where-examples" class="page">
+            <h2 class="text-3xl font-semibold text-white mb-6 slide-left">Where It Occurs & Real-Life Examples</h2>
+            <p class="text-gray-300 mb-6 slide-left">Vulnerable places: online, offline, at work, in public. Examples include Equifax breach, phishing attacks, and lost wallets leading to fraud.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 slide-left">
+                <div class="text-center">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/dd0bdfe0-bf14-425f-8405-46a68516bd70.png" alt="Iconic illustration of a computer with a red warning sign, representing online identity theft through hacking or phishing, set in a dark room with green matrix code overlay" />
+                </div>
+                <div class="text-center">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/3f13380c-4ac5-4f3d-a44b-62511de51a15.png" alt="Collage of news headlines about data breaches, phishing alerts, and identity theft warnings, with icons of locks being broken and wallets stolen, in a dark newspaper-style layout" />
+                </div>
+            </div>
+            <button class="next-btn" onclick="showPage('main-menu')">Back to Menu</button>
+        </section>
+
+        <section id="demo" class="page">
+            <h2 class="text-3xl font-semibold text-white mb-6 slide-left">Demo: Simulated Identity Theft Risk</h2>
+            <p class="text-gray-300 mb-6 slide-left">Enter fake details to see what could happen if a hack occurs.</p>
+            <form id="demoForm" class="bg-gray-700 p-6 rounded-lg shadow-inner mb-6 slide-left">
+                <div class="mb-4">
+                    <label class="block text-left text-gray-300 mb-2">Full Name:</label>
+                    <input type="text" id="name" class="form-input w-full" required />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-left text-gray-300 mb-2">Email:</label>
+                    <input type="email" id="email" class="form-input w-full" required />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-left text-gray-300 mb-2">Credit Card Number (Fake):</label>
+                    <input type="text" id="card" class="form-input w-full" required pattern="[0-9]{16}" title="Enter a 16-digit fake number" />
+                </div>
+                <button type="submit" class="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-500 transition w-full">Submit</button>
+            </form>
+            <img id="demoImg" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/6569e90a-cc8e-4710-a6b5-1787b2508871.png" alt="Animated illustration of personal data being sucked into a swirling black hole with hacker icons, representing data theft in the demo, with red warning lights flashing in a dark cyber vortex" style="display:none; max-width: 450px; width: 85%; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);" />
+            <button class="next-btn" onclick="showPage('main-menu')">Back to Menu</button>
+            <div class="modal" id="hack-modal">
+                <div class="modal-content">
+                    <h3 class="text-xl font-bold text-white" id="hack-title">Hack Status</h3>
+                    <p class="text-gray-300" id="hack-text">Your data has been compromised in this simulation.</p>
+                    <button class="next-btn" onclick="closeModal('hack-modal')">Close</button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        let selectedPage = '';
+        function showPage(page) {
+            if (page === 'main-menu') {
+                selectedPage = page;
+                confirmSelection();
+                return;
+            }
+            selectedPage = page;
+            document.getElementById('option-modal').classList.add('active');
+            document.getElementById('modal-text').textContent = `You've chosen to explore: ${page.replace('-', ' ').toUpperCase()}`;
+        }
+        function confirmSelection() {
+            document.getElementById('option-modal').classList.remove('active');
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(p => p.classList.remove('active'));
+            document.getElementById(selectedPage).classList.add('active');
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        document.getElementById('demoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const card = document.getElementById('card').value;
+            if (name && email && card) {
+                document.getElementById('hack-text').textContent = `Your data: Name: ${name}, Email: ${email}, Card: ${card} has been 'stolen'. This is a simulation!`;
+                document.getElementById('hack-modal').classList.add('active');
+                document.getElementById('demoImg').style.display = 'block';
+                document.getElementById('demoImg').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    </script>
+</body>
+</html

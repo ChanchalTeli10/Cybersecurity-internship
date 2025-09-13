@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enhanced Image Morphing – Fake IDs Awareness Platform</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            transition: background-color 0.5s ease;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            color: #ffffff;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            max-width: 800px;
+            margin: 0 auto 40px;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        input[type="range"], button {
+            display: inline-block;
+            margin: 10px 5px;
+            padding: 10px;
+            background-color: #333333;
+            color: #e0e0e0;
+            border: 1px solid #555555;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover, input[type="range"]:hover {
+            background-color: #555555;
+        }
+        canvas {
+            display: block;
+            margin: 20px auto;
+            border: 2px solid #555555;
+            border-radius: 10px;
+            background-color: #000000;
+        }
+        #morphSlider {
+            width: 80%;
+            margin: 10px auto;
+            display: block;
+        }
+        #riskMeter {
+            width: 100%;
+            height: 20px;
+            background-color: #333333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #riskLevel {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000);
+            transition: width 0.5s ease;
+        }
+        #riskDescription {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .quiz-question {
+            margin-bottom: 20px;
+        }
+        .option-btn {
+            margin: 5px;
+            padding: 10px;
+            background-color: #333333;
+            border: 1px solid #555555;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .option-btn:hover {
+            background-color: #555555;
+        }
+        .option-btn.correct {
+            background-color: #00ff00;
+        }
+        .option-btn.wrong {
+            background-color: #ff0000;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #333333;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: #00ff00;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        .preset-gallery {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .preset-gallery button {
+            padding: 10px 20px;
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 10px;
+            }
+            input, button {
+                width: 90%;
+            }
+            canvas {
+                width: 100%;
+                height: auto;
+            }
+            .preset-gallery {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Enhanced Image Morphing – Fake IDs Creation & Awareness Platform</h1>
+        <p>Explore advanced features, switch presets, and learn through quizzes. Stay aware of online risks!</p>
+    </header>
+
+    <section class="section" id="overviewSection">
+        <h2>Introduction to Image Morphing</h2>
+        <p>Image morphing blends images to create new ones, often misused for fake identities. Use this demo to understand and detect such techniques.</p>
+        <p>Interactive features include presets switching, animated transitions, and more.</p>
+    </section>
+
+    <section class="section" id="presetSection">
+        <h2>Preset Face Combinations</h2>
+        <div class="preset-gallery">
+            <button id="preset1Btn">Preset 1</button>
+            <button id="preset2Btn">Preset 2</button>
+            <button id="preset3Btn">Preset 3</button>
+            <button id="nextPresetBtn">Next Random Preset</button>
+        </div>
+        <p>Select a preset or click next for a random one.</p>
+    </section>
+
+    <section class="section" id="morphSection">
+        <h2>Interactive Face Morphing Demo</h2>
+        <canvas id="morphCanvas" width="400" height="400"></canvas>
+        <label for="morphSlider">Blend Ratio:</label>
+        <input type="range" id="morphSlider" min="0" max="100" value="50" />
+        <button id="autoPlayBtn">Auto Play Morph</button>
+        <button id="resetBtn">Reset</button>
+        <p>Slide to blend. Auto play animates the morph. Reset restores original.</p>
+    </section>
+
+    <section class="section" id="riskSection">
+        <h2>Risk Meter</h2>
+        <div id="riskMeter">
+            <div id="riskLevel"></div>
+        </div>
+        <p id="riskDescription">Low risk: Minimal morphing detected.</p>
+        <p>Swipe above to update risk level dynamically.</p>
+    </section>
+
+    <section class="section" id="quizSection">
+        <h2>Test Your Awareness</h2>
+        <div class="progress-bar">
+            <div id="quizProgress" class="progress-fill"></div>
+        </div>
+        <p>Progress: 0%</p>
+        <div id="quizContainer"></div>
+        <button id="quizBtn">Start Quiz</button>
+        <button id="randomizeQuizBtn">Randomize Questions</button>
+    </section>
+
+    <section class="section" id="tipsSection">
+        <h2>Awareness Tips</h2>
+        <ul>
+            <li>Always verify IDs and documents from trusted sources.</li>
+            <li>Look for unnatural blending or inconsistencies in images.</li>
+            <li>Use morphing tools responsibly for creative purposes only.</li>
+            <li>Report suspicious activities to authorities.</li>
+        </ul>
+    </section>
+
+    <footer style="text-align: center; margin-top: 40px;">
+        <p>© 2025 Enhanced Image Morphing Awareness Project</p>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('morphCanvas');
+        const ctx = canvas.getContext('2d');
+        const slider = document.getElementById('morphSlider');
+        const preset1Btn = document.getElementById('preset1Btn');
+        const preset2Btn = document.getElementById('preset2Btn');
+        const preset3Btn = document.getElementById('preset3Btn');
+        const nextPresetBtn = document.getElementById('nextPresetBtn');
+        const autoPlayBtn = document.getElementById('autoPlayBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const riskLevelDiv = document.getElementById('riskLevel');
+        const riskDescription = document.getElementById('riskDescription');
+        const quizContainer = document.getElementById('quizContainer');
+        const quizBtn = document.getElementById('quizBtn');
+        const randomizeQuizBtn = document.getElementById('randomizeQuizBtn');
+        const quizProgress = document.getElementById('quizProgress');
+
+        let img1 = new Image();
+        let img2 = new Image();
+        let img1Loaded = false;
+        let img2Loaded = false;
+        let currentPreset = 0;
+        let autoPlayInterval;
+        let quizCompleted = false;
+
+        // Preset data
+        const presets = [
+            { img1: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/cb66ba54-7ff7-4fe1-aa22-6b53e2248727.png', img2: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/befe2bea-5d90-44fd-9b39-3ec96e40dcc5.png' },
+            { img1: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/21ceccc1-8c54-45c1-aafe-d32af310b3bd.png', img2: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/18dfc101-ffb4-4877-9f02-dbe3ae14f911.png' },
+            { img1: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/84eb987f-03f9-4dd9-b83f-68cd66ae3589.png', img2: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/470b7c55-2fa8-4660-8a25-946ccc807752.png' }
+        ];
+
+        // Quiz data with more questions
+        let questions = [
+            { question: "Image morphing can create fake IDs. True or False?", options: ["True", "False"], answer: 0 },
+            { question: "Unnatural features indicate a morphed image?", options: ["Yes", "No"], answer: 0 },
+            { question: "Blending two faces reduces identity risks?", options: ["Yes", "No"], answer: 1 },
+            { question: "Use morphing for fun animations.", options: ["True", "False"], answer: 0 }
+        ];
+        let currentQuestionIndex = 0;
+
+        // Load preset on page load
+        window.onload = function() {
+            loadPreset(currentPreset);
+        };
+
+        // Preset buttons
+        preset1Btn.addEventListener('click', () => { currentPreset = 0; loadPreset(currentPreset); });
+        preset2Btn.addEventListener('click', () => { currentPreset = 1; loadPreset(currentPreset); });
+        preset3Btn.addEventListener('click', () => { currentPreset = 2; loadPreset(currentPreset); });
+        nextPresetBtn.addEventListener('click', () => { currentPreset = Math.floor(Math.random() * presets.length); loadPreset(currentPreset); });
+
+        // Auto play and reset
+        autoPlayBtn.addEventListener('click', () => {
+            let val = 0;
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = setInterval(() => {
+                slider.value = val;
+                drawMorph();
+                updateRiskMeter();
+                val = (val + 1) % 101;
+            }, 50);
+        });
+        resetBtn.addEventListener('click', () => {
+            clearInterval(autoPlayInterval);
+            slider.value = 50;
+            drawMorph();
+            updateRiskMeter();
+        });
+
+        slider.addEventListener('input', () => { drawMorph(); updateRiskMeter(); });
+
+        function loadPreset(index) {
+            img1Loaded = img2Loaded = false;
+            img1.src = presets[index].img1;
+            img2.src = presets[index].img2;
+        }
+
+        img1.onload = () => { img1Loaded = true; drawMorph(); };
+        img2.onload = () => { img2Loaded = true; drawMorph(); };
+
+        function drawMorph() {
+            if (!img1Loaded || !img2Loaded) return;
+            const blend = slider.value / 100;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = 1 - blend;
+            ctx.drawImage(img1, 0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = blend;
+            ctx.drawImage(img2, 0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = 1;
+        }
+
+        function updateRiskMeter() {
+            const value = parseInt(slider.value);
+            const riskPercent = value > 30 ? (value > 70 ? 100 : 50) : 20;
+            riskLevelDiv.style.width = riskPercent + '%';
+            riskDescription.textContent = riskPercent > 70 ? 'High risk!' : riskPercent > 30 ? 'Medium risk!' : 'Low risk!';
+        }
+
+        // Quiz
+        quizBtn.addEventListener('click', () => { currentQuestionIndex = 0; loadQuiz(); });
+        randomizeQuizBtn.addEventListener('click', () => {
+            questions = questions.sort(() => Math.random() - 0.5);
+            currentQuestionIndex = 0;
+            quizProgress.style.width = '0%';
+            loadQuiz();
+        });
+
+        function loadQuiz() {
+            quizContainer.innerHTML = '';
+            if (currentQuestionIndex < questions.length) {
+                quizProgress.style.width = (currentQuestionIndex / questions.length * 100) + '%';
+                const q = questions[currentQuestionIndex];
+                const qDiv = document.createElement('div');
+                qDiv.classList.add('quiz-question');
+                qDiv.innerHTML = `<p>${currentQuestionIndex + 1}. ${q.question}</p>`;
+                q.options.forEach((opt, i) => {
+                    const btn = document.createElement('button');
+                    btn.classList.add('option-btn');
+                    btn.textContent = opt;
+                    btn.addEventListener('click', () => {
+                        if (i === q.answer) {
+                            btn.classList.add('correct');
+                        } else {
+                            btn.classList.add('wrong');
+                        }
+                        currentQuestionIndex++;
+                        if (currentQuestionIndex < questions.length) {
+                            setTimeout(loadQuiz, 1000);
+                        } else {
+                            quizCompleted = true;
+                        }
+                    });
+                    qDiv.appendChild(btn);
+                });
+                quizContainer.appendChild(qDiv);
+            }
+        }
+    </script>
+</body>
+</html>

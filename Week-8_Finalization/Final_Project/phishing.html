@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Phishing Demo — Fixed JS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    :root {
+      --bg-start: #1a1a1a;
+      --bg-end: #0b0b0b;
+      --card-bg: #222;
+      --card-shadow: rgba(0, 0, 0, 0.6);
+      --accent: #4da6ff;
+      --accent-hover: #3399ff;
+      --safe-bg: #2e7d32;
+      --safe-hover: #27692a;
+      --sus-bg: #c62828;
+      --sus-hover: #a52121;
+      --muted: #999;
+      --text-primary: #e0e0e0;
+      --text-secondary: #bbb;
+      --border-radius: 10px;
+      --transition: 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px 20px;
+      font-family: 'Inter', Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .inbox {
+      max-width: 900px;
+      width: 100%;
+      background: #121212;
+      border-radius: var(--border-radius);
+      box-shadow: 0 8px 24px var(--card-shadow);
+      padding: 30px 40px 40px;
+      user-select: none;
+    }
+
+    h1 {
+      color: #00d1b2;
+      text-align: center;
+      font-weight: 600;
+      font-size: 2.4rem;
+      margin-bottom: 30px;
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 6px #00d1b2aa;
+    }
+
+    .status {
+      background: #222;
+      padding: 14px 20px;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 30px;
+      box-shadow: inset 0 0 8px #4da6ff44;
+      user-select: text;
+    }
+
+    .email {
+      background: var(--card-bg);
+      padding: 20px 25px;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+      border: 1px solid #333;
+      box-shadow: 0 4px 12px #0008;
+      transition: box-shadow var(--transition), transform var(--transition);
+      cursor: default;
+    }
+
+    .email:hover:not(.done) {
+      box-shadow: 0 8px 20px #4da6ff88;
+      transform: translateY(-3px);
+    }
+
+    .email.done {
+      opacity: 0.5;
+      filter: grayscale(0.6);
+      pointer-events: none;
+      cursor: default;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    .meta {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .email p {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 18px;
+      color: var(--text-secondary);
+    }
+
+    .email a {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color var(--transition);
+      user-select: text;
+    }
+
+    .email a:hover:not(.done a) {
+      color: var(--accent-hover);
+      text-decoration: underline;
+    }
+
+    .email.done a {
+      pointer-events: none;
+      color: #666 !important;
+      text-decoration: none !important;
+      cursor: default;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      flex: 1 1 120px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color var(--transition), box-shadow var(--transition);
+      user-select: none;
+      box-shadow: 0 3px 8px #0008;
+      color: #fff;
+      text-shadow: 0 0 3px #0008;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .safe {
+      background-color: var(--safe-bg);
+      box-shadow: 0 4px 12px #27692aaa;
+    }
+
+    .safe:hover:not(:disabled) {
+      background-color: var(--safe-hover);
+      box-shadow: 0 6px 16px #27692acc;
+    }
+
+    .sus {
+      background-color: var(--sus-bg);
+      box-shadow: 0 4px 12px #a52121aa;
+    }
+
+    .sus:hover:not(:disabled) {
+      background-color: var(--sus-hover);
+      box-shadow: 0 6px 16px #a52121cc;
+    }
+
+    @media (max-width: 600px) {
+      .inbox {
+        padding: 20px 20px 30px;
+      }
+
+      button {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="inbox">
+    <h1>Phishing Awareness — Demo Inbox</h1>
+    <div id="status" class="status">Correct: 0 | Mistakes: 0 | Processed: 0/5</div>
+
+    <div class="email" data-phish="true">
+      <div class="meta"><strong>From:</strong> support@amz-secure.com — <strong>Subject:</strong> Urgent: Verify your Amazon account</div>
+      <p>Your account has been locked. <a href="#" onclick="phishLink(event,this)">Click here to verify</a></p>
+      <div class="controls">
+        <button class="safe" onclick="markEmail(this,false)">Mark as Safe</button>
+        <button class="sus" onclick="markEmail(this,true)">Mark as Suspicious</button>
+      </div>
+    </div>
+
+    <div class="email" data-phish="true">
+      <div class="meta"><strong>From:</strong> hr@company-payrolls.com — <strong>Subject:</strong> Salary Slip for August</div>
+      <p>Please see attached document for your salary details.</p>
+      <div class="controls">
+        <button class="safe" onclick="markEmail(this,false)">Mark as Safe</button>
+        <button class="sus" onclick="markEmail(this,true)">Mark as Suspicious</button>
+      </div>
+    </div>
+
+    <div class="email" data-phish="true">
+      <div class="meta"><strong>From:</strong> security@microsοft.com — <strong>Subject:</strong> Reset your Microsoft password</div>
+      <p>We detected unusual activity. <a href="#" onclick="resetPassword(event,this)">Reset Password</a></p>
+      <div class="controls">
+        <button class="safe" onclick="markEmail(this,false)">Mark as Safe</button>
+        <button class="sus" onclick="markEmail(this,true)">Mark as Suspicious</button>
+      </div>
+    </div>
+
+    <div class="email" data-phish="true">
+      <div class="meta"><strong>From:</strong> alerts@hdfcbank-secure.com — <strong>Subject:</strong> Immediate action required</div>
+      <p>Your account may be suspended. <a href="#" onclick="phishLink(event,this)">Login to your account</a></p>
+      <div class="controls">
+        <button class="safe" onclick="markEmail(this,false)">Mark as Safe</button>
+        <button class="sus" onclick="markEmail(this,true)">Mark as Suspicious</button>
+      </div>
+    </div>
+
+    <div class="email" data-phish="false">
+      <div class="meta"><strong>From:</strong> updates@school.edu — <strong>Subject:</strong> Upcoming Holiday Schedule</div>
+      <p>Please note school will remain closed on 1st September.</p>
+      <div class="controls">
+        <button class="safe" onclick="markEmail(this,false)">Mark as Safe</button>
+        <button class="sus" onclick="markEmail(this,true)">Mark as Suspicious</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const emails = Array.from(document.querySelectorAll('.email'));
+    const total = emails.length;
+    let correct = 0, mistakes = 0, processed = 0;
+    const statusEl = document.getElementById('status');
+  
+    function updateStatus(){
+      statusEl.innerText = `Correct: ${correct} | Mistakes: ${mistakes} | Processed: ${processed}/${total}`;
+    }
+  
+    function disableEmailDiv(emailDiv){
+      emailDiv.classList.add('done');
+      emailDiv.querySelectorAll('button').forEach(b=>b.disabled = true);
+      emailDiv.querySelectorAll('a').forEach(a=>{ a.style.pointerEvents = 'none'; a.style.color = '#666'; });
+    }
+  
+    function finishedCheck(){
+      if(processed !== total) return;
+      if(correct >= 3){
+        alert(`🎉 Congratulations! You identified ${correct}/${total} correctly.`);
+      } else {
+        alert(`⚠ Keep practicing — you identified only ${correct}/${total} correctly.`);
+      }
+    }
+  
+    function markEmail(button, userChoiceSuspicious){
+      const emailDiv = button.closest('.email');
+      if(!emailDiv || emailDiv.classList.contains('done')) return;
+  
+      const isPhish = emailDiv.dataset.phish === 'true';
+      processed++;
+  
+      if((isPhish && userChoiceSuspicious) || (!isPhish && !userChoiceSuspicious)){
+        correct++;
+      } else {
+        mistakes++;
+      }
+  
+      disableEmailDiv(emailDiv);
+      updateStatus();
+      if(processed === total) setTimeout(finishedCheck, 100);
+    }
+  
+    function phishLink(evt, anchor){
+      evt.preventDefault();
+      const emailDiv = anchor.closest('.email');
+      if(!emailDiv || emailDiv.classList.contains('done')) return;
+  
+      processed++; mistakes++;
+      disableEmailDiv(emailDiv);
+      updateStatus();
+      alert('⚠ Warning — this link is malicious. In real life you would have been hacked by clicking it.');
+      if(processed === total) setTimeout(finishedCheck, 100);
+    }
+  
+    function resetPassword(evt, anchor){
+      evt.preventDefault();
+      const emailDiv = anchor.closest('.email');
+      if(!emailDiv || emailDiv.classList.contains('done')) return;
+  
+      const u = prompt('Enter your username (example to demo):');
+      if(u === null) return;
+      const p = prompt('Enter your password (example to demo):');
+      if(p === null){
+        processed++; mistakes++; disableEmailDiv(emailDiv); updateStatus();
+        if(processed===total) setTimeout(finishedCheck,100);
+        return;
+      }
+  
+      processed++; mistakes++;
+      disableEmailDiv(emailDiv);
+      updateStatus();
+      alert('⚠ Warning — you entered credentials into a fake form. In real life your account would be compromised.');
+      if(processed === total) setTimeout(finishedCheck, 100);
+    }
+  
+    updateStatus();
+  </script>
+  
+</body>
+</html>
